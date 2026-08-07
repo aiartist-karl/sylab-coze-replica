@@ -7,6 +7,7 @@ import '../theme/coze_colors.dart';
 import '../theme/coze_theme.dart';
 import '../services/auth_service.dart';
 import 'skill_store_page.dart';
+import 'credits_detail_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -309,27 +310,14 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _showCreditsDetail() {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('积分消耗明细'),
-        content: const SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _detailRow('8月7日', '-100', '对话消耗'),
-              _detailRow('8月6日', '-50', '生图消耗'),
-              _detailRow('8月5日', '-200', '视频生成'),
-              _detailRow('8月4日', '-150', '对话消耗'),
-              SizedBox(height: 8),
-              Text('新注册赠送 100 积分', style: TextStyle(color: Colors.green, fontSize: 13)),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('关闭')),
-        ],
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 300),
+        pageBuilder: (context, animation, secondaryAnimation) => const CreditsDetailPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
       ),
     );
   }
@@ -337,27 +325,6 @@ class _ProfilePageState extends State<ProfilePage> {
   void _toast(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(msg), duration: const Duration(seconds: 1)),
-    );
-  }
-}
-
-class _detailRow extends StatelessWidget {
-  final String date;
-  final String amount;
-  final String desc;
-  const _detailRow(this.date, this.amount, this.desc);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(children: [
-        Text(date, style: const TextStyle(fontSize: 13, color: Colors.grey)),
-        const SizedBox(width: 12),
-        Text(amount, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.red)),
-        const SizedBox(width: 8),
-        Text(desc, style: const TextStyle(fontSize: 13)),
-      ]),
     );
   }
 }
