@@ -17,8 +17,9 @@ jobs:
           java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.44.8'
           channel: 'stable'
+          cache: false
       - name: Clean and generate Android project
         run: |
           rm -rf android
@@ -36,8 +37,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.44.8'
           channel: 'stable'
+          cache: false
       - name: Clean and generate iOS project
         run: |
           rm -rf ios
