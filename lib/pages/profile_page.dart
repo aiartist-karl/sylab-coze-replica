@@ -169,57 +169,56 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       child: Row(
         children: [
-            GestureDetector(
-              onTap: _changeAvatar,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  _buildAvatar(),
-                  Positioned(
-                    right: -2,
-                    bottom: -2,
-                    child: Container(
-                      width: 22,
-                      height: 22,
-                      decoration: BoxDecoration(
-                        color: CozeColors.bgMax,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: CozeColors.strokePrimary, width: 1),
-                      ),
-                      child: const Icon(Icons.camera_alt, size: 12, color: CozeColors.fgDim),
+          GestureDetector(
+            onTap: _changeAvatar,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _buildAvatar(),
+                Positioned(
+                  right: -2,
+                  bottom: -2,
+                  child: Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: CozeColors.bgMax,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: CozeColors.strokePrimary, width: 1),
                     ),
+                    child: const Icon(Icons.camera_alt, size: 12, color: CozeColors.fgDim),
                   ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: CozeSpacing.lg),
+          Expanded(
+            child: GestureDetector(
+              onTap: _changeNickname,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(_userService.nickname,
+                          style: const TextStyle(
+                              fontSize: CozeFontSize.s20,
+                              fontWeight: FontWeight.bold,
+                              color: CozeColors.fgPrimary)),
+                      const SizedBox(width: CozeSpacing.sm),
+                      const Icon(Icons.edit, size: 14, color: CozeColors.fgDim),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text('ID: user_${_userService.nickname.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}',
+                      style: const TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgDim)),
                 ],
               ),
             ),
-            const SizedBox(width: CozeSpacing.lg),
-            Expanded(
-              child: GestureDetector(
-                onTap: _changeNickname,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(_userService.nickname,
-                            style: const TextStyle(
-                                fontSize: CozeFontSize.s20,
-                                fontWeight: FontWeight.bold,
-                                color: CozeColors.fgPrimary)),
-                        const SizedBox(width: CozeSpacing.sm),
-                        const Icon(Icons.edit, size: 14, color: CozeColors.fgDim),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text('ID: user_${_userService.nickname.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}',
-                        style: const TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgDim)),
-                  ],
-                ),
-              ),
-            ),
-            const Icon(Icons.chevron_right, size: 22, color: CozeColors.fgDim),
-          ],
-        ),
+          ),
+          const Icon(Icons.chevron_right, size: 22, color: CozeColors.fgDim),
+        ],
       ),
     );
   }
