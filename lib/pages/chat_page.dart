@@ -515,62 +515,13 @@ class _ChatPageState extends State<ChatPage> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
-        bool isRecording = false;
-        return StatefulBuilder(
-          builder: (ctx, setDialogState) => Dialog(
-            child: Container(
-              width: MediaQuery.of(ctx).size.width * 0.8,
-              padding: const EdgeInsets.all(CozeSpacing.xl),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GestureDetector(
-                    onLongPressStart: (_) {
-                      setDialogState(() => isRecording = true);
-                    },
-                    onLongPressEnd: (_) {
-                      setDialogState(() => isRecording = false);
-                      // In real app: stop recording and send
-                      Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('语音发送功能对接中'), duration: Duration(seconds: 1)),
-                      );
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: CozeSpacing.xl),
-                      decoration: BoxDecoration(
-                        color: isRecording ? CozeColors.error.withOpacity(0.1) : CozeColors.chipGray,
-                        borderRadius: CozeRadius.xxlBorder,
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            isRecording ? Icons.mic : Icons.mic_none,
-                            size: 48,
-                            color: isRecording ? CozeColors.error : CozeColors.fgSecondary,
-                          ),
-                          const SizedBox(height: CozeSpacing.md),
-                          Text(
-                            isRecording ? '松开 结束录音' : '按住 开始说话',
-                            style: TextStyle(
-                              fontSize: CozeFontSize.s16,
-                              color: isRecording ? CozeColors.error : CozeColors.fgPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: CozeSpacing.md),
-                  const Text(
-                    '对接后端语音API后，按住说话即可直接发送语音消息',
-                    style: TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.dimText),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        return _VoiceInputDialog(
+          onReleased: () {
+            Navigator.pop(ctx);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('语音发送功能对接中'), duration: Duration(seconds: 1)),
+            );
+          },
         );
       },
     );
@@ -602,4 +553,74 @@ class _AttachItem {
   final String label;
   final bool hasRedDot;
   const _AttachItem(this.icon, this.label, this.hasRedDot);
+}
+
+class _VoiceInputDialog extends StatefulWidget {
+  final VoidCallback onReleased;
+  const _VoiceInputDialog({required this.onReleased});
+
+  @override
+  State<_VoiceInputDialog> createState() => _VoiceInputDialogState();
+}
+
+class _VoiceInputDialogState extends State<_VoiceInputDialog> {
+  bool _isPressing = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.8,
+        padding: const EdgeInsets.all(CozeSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTapDown: (_) {
+                setState(() => _isPressing = true);
+              },
+              onTapUp: (_) {
+                setState(() => _isPressing = false);
+                widget.onReleased();
+              },
+              onTapCancel: () {
+                setState(() => _isPressing = false);
+                widget.onReleased();
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: CozeSpacing.xl),
+                decoration: BoxDecoration(
+                  color: _isPressing ? CozeColors.error.withOpacity(0.1) : CozeColors.chipGray,
+                  borderRadius: CozeRadius.xxlBorder,
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      _isPressing ? Icons.mic : Icons.mic_none,
+                      size: 48,
+                      color: _isPressing ? CozeColors.error : CozeColors.fgSecondary,
+                    ),
+                    const SizedBox(height: CozeSpacing.md),
+                    Text(
+                      _isPressing ? '松开 结束录音' : '按住 开始说话',
+                      style: TextStyle(
+                        fontSize: CozeFontSize.s16,
+                        color: _isPressing ? CozeColors.error : CozeColors.fgPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: CozeSpacing.md),
+            const Text(
+              '对接后端语音API后，按住说话即可直接发送语音消息',
+              style: TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.dimText),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

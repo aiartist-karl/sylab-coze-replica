@@ -9,11 +9,7 @@ class CreditsDetailPage extends StatefulWidget {
   State<CreditsDetailPage> createState() => _CreditsDetailPageState();
 }
 
-class _CreditsDetailPageState extends State<CreditsDetailPage>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
-
+class _CreditsDetailPageState extends State<CreditsDetailPage> {
   // Mock stats data
   final Map<String, dynamic> _stats = {
     'totalUsage': 3557860.239,
@@ -82,25 +78,6 @@ class _CreditsDetailPageState extends State<CreditsDetailPage>
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
-    );
-    _fadeController.forward();
-  }
-
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CozeColors.bgMax,
@@ -135,9 +112,7 @@ class _CreditsDetailPageState extends State<CreditsDetailPage>
           ],
         ),
       ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: ListView(
+      body: ListView(
           padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg, vertical: CozeSpacing.lg),
           children: [
             _buildStatsCard(),
@@ -146,7 +121,6 @@ class _CreditsDetailPageState extends State<CreditsDetailPage>
             const SizedBox(height: CozeSpacing.md),
             _buildRecordsList(),
           ],
-        ),
       ),
     );
   }
