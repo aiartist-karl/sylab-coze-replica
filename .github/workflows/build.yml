@@ -19,8 +19,10 @@ jobs:
         with:
           flutter-version: '3.24.0'
           channel: 'stable'
-      - name: Generate Android project files
-        run: flutter create --project-name coze_replica --org com.karl.ai --platforms=android .
+      - name: Clean and generate Android project
+        run: |
+          rm -rf android
+          flutter create --project-name coze_replica --org com.karl.ai --platforms=android .
       - run: flutter pub get
       - run: flutter build apk --release
       - uses: actions/upload-artifact@v4
@@ -36,8 +38,10 @@ jobs:
         with:
           flutter-version: '3.24.0'
           channel: 'stable'
-      - name: Generate iOS project files
-        run: flutter create --project-name coze_replica --org com.karl.ai --platforms=ios .
+      - name: Clean and generate iOS project
+        run: |
+          rm -rf ios
+          flutter create --project-name coze_replica --org com.karl.ai --platforms=ios .
       - run: flutter pub get
       - run: flutter build ios --release --no-codesign
       - uses: actions/upload-artifact@v4
