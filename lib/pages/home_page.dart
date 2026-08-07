@@ -260,20 +260,14 @@ class _HomePageState extends State<HomePage> {
       _ActionData(Icons.chat_bubble_outline, '项目', () {
         Navigator.push(context, cozeFadeRoute((_) => const ProjectPage()));
       }),
-      _ActionData(Icons.devices, '设备', () {
-        Navigator.push(context, cozeFadeRoute((_) => const DevicePage()));
-      }),
       _ActionData(Icons.psychology, '记忆', () {
         Navigator.push(context, cozeFadeRoute((_) => const MemoryPage()));
       }),
       _ActionData(Icons.auto_awesome, '技能', () {
         Navigator.push(context, cozeFadeRoute((_) => const SkillStorePage()));
       }),
-      _ActionData(Icons.public, 'World', () {
-        Navigator.push(context, cozeFadeRoute((_) => const WorldPage()));
-      }),
-      _ActionData(Icons.history, '历史', () {
-        Navigator.push(context, cozeFadeRoute((_) => const HistoryPage()));
+      _ActionData(Icons.person_outline, '我的', () {
+        Navigator.push(context, cozeFadeRoute((_) => const ProfilePage()));
       }),
     ];
 
