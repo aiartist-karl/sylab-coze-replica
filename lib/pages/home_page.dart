@@ -125,27 +125,9 @@ class _HomePageState extends State<HomePage> {
             Navigator.push(context, cozeFadeRoute((_) => const SearchPage()));
           }),
           const SizedBox(width: CozeSpacing.sm),
-          GestureDetector(
-            onTap: () => setState(() => _showCreateMenu = !_showCreateMenu),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                _iconButton(Icons.add_circle_outline, size: 22),
-                Positioned(
-                  right: -2,
-                  top: -2,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: CozeColors.error,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _iconButton(Icons.add_circle_outline, size: 22, onTap: () {
+            setState(() => _showCreateMenu = !_showCreateMenu);
+          }),
           const SizedBox(width: CozeSpacing.sm),
           _iconButton(Icons.chevron_right, size: 22, onTap: () {
             Navigator.push(
