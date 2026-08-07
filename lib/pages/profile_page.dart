@@ -71,7 +71,7 @@ class ProfilePage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: CozeSpacing.md, horizontal: CozeSpacing.lg),
                 decoration: BoxDecoration(
                   color: CozeColors.bgMax,
-                  borderRadius: CozeRadius.lg,
+                  borderRadius: BorderRadius.all(CozeRadius.lg),
                   border: Border.all(color: CozeColors.strokePrimary),
                 ),
                 child: Row(
