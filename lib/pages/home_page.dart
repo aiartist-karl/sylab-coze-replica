@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _chatList = List<ChatListItem>.from(mockChatList);
+    _chatList = [];
   }
 
   @override
@@ -40,8 +40,6 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             _buildUserBar(),
-            _buildCreditsBanner(),
-            _buildQuickActions(),
             Expanded(child: _buildChatList()),
           ],
         ),
