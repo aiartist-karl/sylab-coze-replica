@@ -274,16 +274,8 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  // ─── Attachment Menu ───
+  // ─── Attachment Menu (only Image) ───
   Widget _buildAttachmentMenu() {
-    final items = [
-      _AttachItem(Icons.image_outlined, '图片', false),
-      _AttachItem(Icons.insert_drive_file_outlined, '文件', false),
-      _AttachItem(Icons.storage_outlined, '数据集', false),
-      _AttachItem(Icons.auto_awesome_outlined, '技能', false),
-      _AttachItem(Icons.mic_outlined, '旁听', true),
-    ];
-
     return Container(
       margin: const EdgeInsets.fromLTRB(CozeSpacing.lg, 0, CozeSpacing.lg, CozeSpacing.sm),
       padding: const EdgeInsets.all(CozeSpacing.md),
@@ -293,48 +285,39 @@ class _ChatPageState extends State<ChatPage> {
         boxShadow: CozeShadow.small,
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: items
-            .map((item) => Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: CozeColors.chipGray,
-                            borderRadius: CozeRadius.xlBorder,
-                          ),
-                          child: Icon(item.icon, size: 24, color: CozeColors.fgSecondary),
-                        ),
-                        if (item.hasRedDot)
-                          Positioned(
-                            right: -2,
-                            top: -2,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                  color: CozeColors.error, shape: BoxShape.circle),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(item.label,
-                        style: const TextStyle(
-                            fontSize: CozeFontSize.s12, color: CozeColors.fgDim)),
-                  ],
-                ))
-            .toList(),
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () {
+              setState(() => _showAttachmentMenu = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('图片选择功能开发中'), duration: Duration(seconds: 1)),
+              );
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: CozeColors.chipGray,
+                    borderRadius: CozeRadius.xlBorder,
+                  ),
+                  child: Icon(Icons.image_outlined, size: 24, color: CozeColors.fgSecondary),
+                ),
+                const SizedBox(height: 4),
+                const Text('图片',
+                    style: TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.fgDim)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  // ─── Bottom Input Area ───
+  // ─── Bottom Input Area (text input) ──
   Widget _buildInputArea() {
     return Container(
       padding: const EdgeInsets.fromLTRB(CozeSpacing.md, CozeSpacing.sm, CozeSpacing.md, CozeSpacing.lg),
@@ -368,21 +351,52 @@ class _ChatPageState extends State<ChatPage> {
             ),
             const SizedBox(width: CozeSpacing.sm),
             Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: CozeSpacing.md),
-                decoration: BoxDecoration(
-                  color: CozeColors.chipGray,
-                  borderRadius: CozeRadius.pillBorder,
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: '输入消息...',
+                  hintStyle: TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgDim),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: CozeSpacing.md),
                 ),
-                child: const Center(
-                  child: Text('按下说话',
-                      style: TextStyle(
-                          fontSize: CozeFontSize.s16, color: CozeColors.fgPrimary)),
-                ),
+                style: const TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgPrimary),
+                maxLines: null,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (text) {
+                  if (text.trim().isNotEmpty) {
+                    setState(() {
+                      _messages.add(_Message(isUser: true, content: text.trim()));
+                    });
+                    // Scroll to bottom
+                    Future.delayed(const Duration(milliseconds: 100), () {
+                      _scrollController.animateTo(
+                        _scrollController.position.maxScrollExtent,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    });
+                  }
+                },
               ),
             ),
             const SizedBox(width: CozeSpacing.sm),
-            const Icon(Icons.keyboard, size: 28, color: CozeColors.fgDim),
+            GestureDetector(
+              onTap: () {
+                // Send message
+                // In real app, send to backend
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('消息发送功能开发中'), duration: Duration(seconds: 1)),
+                );
+              },
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: CozeColors.brand5,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(Icons.send, size: 16, color: Colors.white),
+              ),
+            ),
           ],
         ),
       ),
