@@ -141,7 +141,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             const SizedBox(width: 4),
             Text('$count',
                 style: TextStyle(
-                    fontSize: CozeFontSize.s11,
+                    fontSize: CozeFontSize.s12,
                     color: isSelected ? Colors.white.withOpacity(0.7) : CozeColors.dimText)),
           ],
         ),
