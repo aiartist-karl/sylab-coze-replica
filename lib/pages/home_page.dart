@@ -89,7 +89,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           GestureDetector(
             onTap: () => Navigator.push(
-                context, cozeFadeRoute(builder: (_) => const ProfilePage())),
+                context, cozeFadeRoute( (_) => const ProfilePage())),
             child: Stack(
               clipBehavior: Clip.none,
               children: [
@@ -204,16 +204,16 @@ class _HomePageState extends State<HomePage> {
   Widget _buildQuickActions() {
     final actions = [
       _ActionData(Icons.chat_bubble_outline, '项目', () {
-        Navigator.push(context, cozeFadeRoute(builder: (_) => const ProjectPage()));
+        Navigator.push(context, cozeFadeRoute( (_) => const ProjectPage()));
       }),
       _ActionData(Icons.person_outline, '我的', () {
-        Navigator.push(context, cozeFadeRoute(builder: (_) => const ProfilePage()));
+        Navigator.push(context, cozeFadeRoute( (_) => const ProfilePage()));
       }),
       _ActionData(Icons.memory, '记忆', () {
-        Navigator.push(context, cozeFadeRoute(builder: (_) => const MemoryPage()));
+        Navigator.push(context, cozeFadeRoute( (_) => const MemoryPage()));
       }),
       _ActionData(Icons.auto_awesome, '技能', () {
-        Navigator.push(context, cozeFadeRoute(builder: (_) => const SkillStorePage()));
+        Navigator.push(context, cozeFadeRoute( (_) => const SkillStorePage()));
       }),
     ];
 
@@ -335,7 +335,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildChatItem(ProjectItem item) {
     return GestureDetector(
       onTap: () => Navigator.push(
-          context, cozeFadeRoute(builder: (_) => ChatPage(agentName: item.name, project: item))),
+          context, cozeFadeRoute( (_) => ChatPage(agentName: item.name, project: item))),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg),
         padding: const EdgeInsets.all(CozeSpacing.md),
@@ -406,7 +406,7 @@ class _HomePageState extends State<HomePage> {
             GestureDetector(
               onTap: () => Navigator.push(
                 context,
-                cozeFadeRoute(builder: (_) => ProjectDetailPage(project: item)),
+                cozeFadeRoute( (_) => ProjectDetailPage(project: item)),
               ),
               child: Container(
                 width: 36,
@@ -440,7 +440,7 @@ class _HomePageState extends State<HomePage> {
             Navigator.push(
               context,
               cozeFadeRoute(
-                builder: (_) => const ChatPage(agentName: '新会话'),
+                (_) => const ChatPage(agentName: '新会话'),
               ),
             );
           }),
