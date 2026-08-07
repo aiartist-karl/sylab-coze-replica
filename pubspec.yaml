@@ -18,3 +18,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+<<<<<<< HEAD
+=======
+  assets:
+    - assets/images/
+>>>>>>> 378b244 (feat: Coze App UI replication - pixel-perfect Flutter clone)

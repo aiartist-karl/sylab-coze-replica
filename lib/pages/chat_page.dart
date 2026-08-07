@@ -113,7 +113,10 @@ class _ChatPageState extends State<ChatPage> {
                     onTap: () => _scrollController.animateTo(
                       _scrollController.position.maxScrollExtent,
                       duration: const Duration(milliseconds: 300),
+<<<<<<< HEAD
                       curve: Curves.easeInOut,
+=======
+>>>>>>> 378b244 (feat: Coze App UI replication - pixel-perfect Flutter clone)
                     ),
                     child: Container(
                       width: 40,
