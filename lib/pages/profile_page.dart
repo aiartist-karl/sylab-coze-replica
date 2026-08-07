@@ -8,7 +8,6 @@ import '../widgets/coze_dialog.dart';
 import 'device_page.dart';
 import 'skill_store_page.dart';
 import 'history_page.dart';
-import 'settings_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -79,13 +78,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 fontSize: CozeFontSize.s18,
                 fontWeight: FontWeight.bold,
                 color: CozeColors.fgPrimary)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined, size: 22, color: CozeColors.fgDim),
-            onPressed: () => Navigator.push(
-                context, MaterialPageRoute(builder: (_) => const SettingsPage())),
-          ),
-        ],
+
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg),
@@ -100,13 +93,13 @@ class _ProfilePageState extends State<ProfilePage> {
           // ─── Feature Entries ───
           _buildFeatureSection(context, '常用功能', [
             _FeatureItem(Icons.devices, '设备管理', CozeColors.infoBlue, () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const DevicePage()));
+              Navigator.push(context, cozeFadeRoute((_) => const DevicePage()));
             }),
             _FeatureItem(Icons.auto_awesome, '技能商店', CozeColors.brand5, () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const SkillStorePage()));
+              Navigator.push(context, cozeFadeRoute((_) => const SkillStorePage()));
             }),
             _FeatureItem(Icons.history, '历史对话', CozeColors.teal, () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryPage()));
+              Navigator.push(context, cozeFadeRoute((_) => const HistoryPage()));
             }),
             _FeatureItem(Icons.favorite_outline, '我的收藏', CozeColors.error, () {
               _showToast(context, '功能开发中');
@@ -168,18 +161,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // ─── Profile Card ───
   Widget _buildProfileCard(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage()));
-      },
-      child: Container(
-        padding: const EdgeInsets.all(CozeSpacing.lg),
-        decoration: BoxDecoration(
-          color: CozeColors.chipGray,
-          borderRadius: CozeRadius.xxlBorder,
-        ),
-        child: Row(
-          children: [
+    return Container(
+      padding: const EdgeInsets.all(CozeSpacing.lg),
+      decoration: BoxDecoration(
+        color: CozeColors.chipGray,
+        borderRadius: CozeRadius.xxlBorder,
+      ),
+      child: Row(
+        children: [
             GestureDetector(
               onTap: _changeAvatar,
               child: Stack(

@@ -11,7 +11,8 @@ import 'search_page.dart';
 import 'project_page.dart';
 import 'world_page.dart';
 import 'history_page.dart';
-import 'settings_page.dart';
+import 'memory_page.dart';
+import '../widgets/coze_dialog.dart';
 import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -63,7 +64,7 @@ class _HomePageState extends State<HomePage> {
           // Avatar with red dot
           GestureDetector(
             onTap: () => Navigator.push(
-                context, MaterialPageRoute(builder: (_) => const ProfilePage())),
+                context, cozeFadeRoute((_) => const ProfilePage())),
             child: Stack(
               clipBehavior: Clip.none,
               children: [
@@ -107,7 +108,7 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: GestureDetector(
               onTap: () => Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => const ProfilePage())),
+                  context, cozeFadeRoute((_) => const ProfilePage())),
               child: Text(
                 nickname,
                 style: const TextStyle(
@@ -120,7 +121,7 @@ class _HomePageState extends State<HomePage> {
           ),
           // Right icons
           _iconButton(Icons.search, size: 22, onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const SearchPage()));
+            Navigator.push(context, cozeFadeRoute((_) => const SearchPage()));
           }),
           const SizedBox(width: CozeSpacing.sm),
           GestureDetector(
@@ -147,7 +148,7 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(width: CozeSpacing.sm),
           _iconButton(Icons.chevron_right, size: 22, onTap: () {
             Navigator.push(
-                context, MaterialPageRoute(builder: (_) => const ProfilePage()));
+                context, cozeFadeRoute((_) => const ProfilePage()));
           }),
         ],
       ),
@@ -182,8 +183,6 @@ class _HomePageState extends State<HomePage> {
                     fontWeight: FontWeight.w600,
                     color: CozeColors.fgPrimary)),
             const Spacer(),
-            const Text('升级享受更多权益',
-                style: TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgDim)),
             const Icon(Icons.chevron_right, size: 18, color: CozeColors.fgDim),
           ],
         ),
@@ -276,19 +275,22 @@ class _HomePageState extends State<HomePage> {
   Widget _buildQuickActions() {
     final actions = [
       _ActionData(Icons.chat_bubble_outline, '项目', () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const ProjectPage()));
+        Navigator.push(context, cozeFadeRoute((_) => const ProjectPage()));
       }),
       _ActionData(Icons.devices, '设备', () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const DevicePage()));
+        Navigator.push(context, cozeFadeRoute((_) => const DevicePage()));
+      }),
+      _ActionData(Icons.psychology, '记忆', () {
+        Navigator.push(context, cozeFadeRoute((_) => const MemoryPage()));
       }),
       _ActionData(Icons.auto_awesome, '技能', () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const SkillStorePage()));
+        Navigator.push(context, cozeFadeRoute((_) => const SkillStorePage()));
       }),
       _ActionData(Icons.public, 'World', () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const WorldPage()));
+        Navigator.push(context, cozeFadeRoute((_) => const WorldPage()));
       }),
-      _ActionData(Icons.history, '历史对话', () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryPage()));
+      _ActionData(Icons.history, '历史', () {
+        Navigator.push(context, cozeFadeRoute((_) => const HistoryPage()));
       }),
     ];
 
@@ -356,7 +358,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildChatItem(ChatListItem item) {
     return GestureDetector(
       onTap: () => Navigator.push(
-          context, MaterialPageRoute(builder: (_) => ChatPage(agentName: item.name))),
+          context, cozeFadeRoute((_) => ChatPage(agentName: item.name))),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg),
         padding: const EdgeInsets.all(CozeSpacing.md),
@@ -428,27 +430,10 @@ class _HomePageState extends State<HomePage> {
         // 导航到聊天页面
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => ChatPage(agentName: '新会话')),
+          cozeFadeRoute((_) => ChatPage(agentName: '新会话')),
         );
       }),
-      _MenuItem(Icons.code, '新建编程项目', null, () {
-        setState(() => _showCreateMenu = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('功能开发中，敬请期待'), duration: Duration(seconds: 1)),
-        );
-      }),
-      _MenuItem(Icons.movie_outlined, '新建视频项目', null, () {
-        setState(() => _showCreateMenu = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('功能开发中，敬请期待'), duration: Duration(seconds: 1)),
-        );
-      }),
-      _MenuItem(Icons.smart_toy_outlined, '新建Agent', null, () {
-        setState(() => _showCreateMenu = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('功能开发中，敬请期待'), duration: Duration(seconds: 1)),
-        );
-      }),
+
     ];
 
     return Container(
