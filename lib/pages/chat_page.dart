@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/coze_colors.dart';
 import '../theme/coze_theme.dart';
 import '../models/project_item.dart';
+import '../widgets/coze_dialog.dart';
 import 'project_detail_page.dart';
 
 class ChatPage extends StatefulWidget {
@@ -109,7 +110,7 @@ class _ChatPageState extends State<ChatPage> {
               tooltip: '项目文件',
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => ProjectDetailPage(project: project)),
+                cozeFadeRoute((_) => ProjectDetailPage(project: project)),
               ),
             ),
         ],
@@ -170,40 +171,19 @@ class _ChatPageState extends State<ChatPage> {
 
   // ─── Rename Project Dialog ───
   void _renameProject() {
-    final controller = TextEditingController(text: widget.agentName);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('修改项目名称'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: '输入新项目名称',
-            border: OutlineInputBorder(),
-          ),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () {
-              final newName = controller.text.trim();
-              if (newName.isNotEmpty) {
-                // In real app, update project name via API
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('项目名称已修改为「$newName」'), duration: const Duration(seconds: 1)),
-                );
-                Navigator.pop(ctx);
-              }
-            },
-            child: const Text('保存'),
-          ),
-        ],
-      ),
-    );
+    CozeDialog.showInput(
+      context,
+      title: '修改项目名称',
+      hintText: '输入新项目名称',
+      initialValue: widget.agentName,
+      confirmText: '保存',
+    ).then((newName) {
+      if (newName != null && newName.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('项目名称已修改为「$newName」'), duration: const Duration(seconds: 1)),
+        );
+      }
+    });
   }
 
   // ─── Date Separator ───
@@ -465,49 +445,26 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _showTextFieldKeyboard() {
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        final controller = TextEditingController();
-        return AlertDialog(
-          title: const Text('发送消息'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              hintText: '输入消息...',
-              border: OutlineInputBorder(),
-            ),
-            autofocus: true,
-            maxLines: 4,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('取消'),
-            ),
-            TextButton(
-              onPressed: () {
-                final text = controller.text.trim();
-                if (text.isNotEmpty) {
-                  setState(() {
-                    _messages.add(_Message(isUser: true, content: text));
-                  });
-                }
-                Navigator.pop(ctx);
-                Future.delayed(const Duration(milliseconds: 100), () {
-                  _scrollController.animateTo(
-                    _scrollController.position.maxScrollExtent,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                });
-              },
-              child: const Text('发送'),
-            ),
-          ],
-        );
-      },
-    );
+    CozeDialog.showInput(
+      context,
+      title: '发送消息',
+      hintText: '输入消息...',
+      maxLines: 4,
+      confirmText: '发送',
+    ).then((text) {
+      if (text != null && text.isNotEmpty) {
+        setState(() {
+          _messages.add(_Message(isUser: true, content: text));
+        });
+        Future.delayed(const Duration(milliseconds: 100), () {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        });
+      }
+    });
   }
 
   void _showVoiceInputOverlay() {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/coze_colors.dart';
 import '../theme/coze_theme.dart';
 import '../models/project_item.dart';
+import '../widgets/coze_dialog.dart';
 import 'project_detail_page.dart';
 
 /// 项目列表页 — 每个会话 = 一个项目工作空间
@@ -119,7 +120,7 @@ class _ProjectPageState extends State<ProjectPage> {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => ProjectDetailPage(project: project)),
+        cozeFadeRoute((_) => ProjectDetailPage(project: project)),
       ),
       child: Container(
         padding: const EdgeInsets.all(CozeSpacing.lg),

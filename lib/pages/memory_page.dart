@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/coze_colors.dart';
 import '../theme/coze_theme.dart';
+import '../widgets/coze_dialog.dart';
 
 class MemoryPage extends StatefulWidget {
   const MemoryPage({super.key});
@@ -184,43 +185,58 @@ class _MemoryPageState extends State<MemoryPage> {
         final contentController = TextEditingController();
         final categoryController = TextEditingController(text: '用户偏好');
 
-        return AlertDialog(
-          title: const Text('添加记忆'),
+        return CozeDialog(
+          title: '添加记忆',
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: categoryController,
-                decoration: const InputDecoration(
+                style: const TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgPrimary),
+                decoration: InputDecoration(
                   labelText: '分类',
-                  border: OutlineInputBorder(),
+                  labelStyle: const TextStyle(color: CozeColors.fgDim, fontSize: CozeFontSize.s14),
+                  filled: true,
+                  fillColor: CozeColors.chipGray,
+                  border: OutlineInputBorder(borderRadius: CozeRadius.xlBorder, borderSide: BorderSide.none),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg, vertical: CozeSpacing.md),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: CozeSpacing.md),
               TextField(
                 controller: contentController,
-                decoration: const InputDecoration(
+                style: const TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgPrimary),
+                decoration: InputDecoration(
                   labelText: '记忆内容',
-                  border: OutlineInputBorder(),
+                  labelStyle: const TextStyle(color: CozeColors.fgDim, fontSize: CozeFontSize.s14),
+                  filled: true,
+                  fillColor: CozeColors.chipGray,
+                  border: OutlineInputBorder(borderRadius: CozeRadius.xlBorder, borderSide: BorderSide.none),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg, vertical: CozeSpacing.md),
                 ),
                 maxLines: 3,
               ),
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('取消'),
+            GestureDetector(
+              onTap: () => Navigator.pop(ctx),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: CozeSpacing.md),
+                decoration: BoxDecoration(color: CozeColors.chipGray, borderRadius: CozeRadius.xlBorder),
+                child: const Center(child: Text('取消', style: TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgSecondary))),
+              ),
             ),
-            TextButton(
-              onPressed: () {
+            const SizedBox(width: CozeSpacing.sm),
+            GestureDetector(
+              onTap: () {
                 if (contentController.text.trim().isNotEmpty) {
+                  final catName = categoryController.text.trim();
                   setState(() {
-                    // 查找或创建分类
                     var group = _memories.firstWhere(
-                      (g) => g['category'] == categoryController.text.trim(),
+                      (g) => g['category'] == catName,
                       orElse: () {
-                        final newGroup = {'category': categoryController.text.trim(), 'items': []};
+                        final newGroup = {'category': catName, 'items': []};
                         _memories.add(newGroup);
                         return newGroup;
                       },
@@ -233,7 +249,11 @@ class _MemoryPageState extends State<MemoryPage> {
                   Navigator.pop(ctx);
                 }
               },
-              child: const Text('添加'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: CozeSpacing.md),
+                decoration: BoxDecoration(color: CozeColors.brand5, borderRadius: CozeRadius.xlBorder),
+                child: const Center(child: Text('添加', style: TextStyle(fontSize: CozeFontSize.s16, color: Colors.white))),
+              ),
             ),
           ],
         );
@@ -242,92 +262,67 @@ class _MemoryPageState extends State<MemoryPage> {
   }
 
   void _editMemory(Map<String, dynamic> item) {
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        final controller = TextEditingController(text: item['content'] as String);
-
-        return AlertDialog(
-          title: const Text('编辑记忆'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              labelText: '记忆内容',
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 3,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('取消'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (controller.text.trim().isNotEmpty) {
-                  setState(() {
-                    item['content'] = controller.text.trim();
-                  });
-                  Navigator.pop(ctx);
-                }
-              },
-              child: const Text('保存'),
-            ),
-          ],
-        );
-      },
-    );
+    CozeDialog.showInput(
+      context,
+      title: '编辑记忆',
+      hintText: '记忆内容',
+      initialValue: item['content'] as String,
+      maxLines: 3,
+      confirmText: '保存',
+    ).then((text) {
+      if (text != null && text.isNotEmpty) {
+        setState(() {
+          item['content'] = text;
+        });
+      }
+    });
   }
 
   void _deleteMemory(Map<String, dynamic> group, Map<String, dynamic> item) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('确认删除'),
-        content: Text('确定要删除这条记忆吗？\n\n「${item['content']}」'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                (group['items'] as List).remove(item);
-                if ((group['items'] as List).isEmpty) {
-                  _memories.remove(group);
-                }
-              });
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('已删除记忆'), duration: Duration(seconds: 1)),
-              );
-            },
-            child: const Text('删除', style: TextStyle(color: CozeColors.error)),
-          ),
-        ],
-      ),
-    );
+    CozeDialog.showConfirm(
+      context,
+      title: '确认删除',
+      content: '确定要删除这条记忆吗？\n\n「${item['content']}」',
+      confirmText: '删除',
+      cancelText: '取消',
+      isDestructive: true,
+    ).then((confirmed) {
+      if (confirmed) {
+        setState(() {
+          (group['items'] as List).remove(item);
+          if ((group['items'] as List).isEmpty) {
+            _memories.remove(group);
+          }
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('已删除记忆'), duration: Duration(seconds: 1)),
+        );
+      }
+    });
   }
 
   void _viewMemoryDetail(Map<String, dynamic> item) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('记忆详情'),
+      builder: (ctx) => CozeDialog(
+        title: '记忆详情',
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(item['content'] as String, style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 12),
-            Text('记录时间：${item['time']}', style: const TextStyle(fontSize: 14, color: CozeColors.fgDim)),
+            Text(item['content'] as String, style: const TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgPrimary, height: 1.5)),
+            const SizedBox(height: CozeSpacing.md),
+            Text('记录时间：${item['time']}', style: const TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgDim)),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('关闭'),
+          GestureDetector(
+            onTap: () => Navigator.pop(ctx),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: CozeSpacing.md),
+              decoration: BoxDecoration(color: CozeColors.brand5, borderRadius: CozeRadius.xlBorder),
+              child: const Center(child: Text('关闭', style: TextStyle(fontSize: CozeFontSize.s16, color: Colors.white))),
+            ),
           ),
         ],
       ),

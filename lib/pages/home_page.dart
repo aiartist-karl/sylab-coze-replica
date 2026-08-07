@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/coze_colors.dart';
 import '../theme/coze_theme.dart';
 import '../models/project_item.dart';
+import '../widgets/coze_dialog.dart';
 import 'skill_store_page.dart';
 import 'chat_page.dart';
 import 'search_page.dart';
@@ -88,7 +89,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           GestureDetector(
             onTap: () => Navigator.push(
-                context, MaterialPageRoute(builder: (_) => const ProfilePage())),
+                context, cozeFadeRoute(builder: (_) => const ProfilePage())),
             child: Stack(
               clipBehavior: Clip.none,
               children: [
@@ -203,16 +204,16 @@ class _HomePageState extends State<HomePage> {
   Widget _buildQuickActions() {
     final actions = [
       _ActionData(Icons.chat_bubble_outline, '项目', () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const ProjectPage()));
+        Navigator.push(context, cozeFadeRoute(builder: (_) => const ProjectPage()));
       }),
       _ActionData(Icons.person_outline, '我的', () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage()));
+        Navigator.push(context, cozeFadeRoute(builder: (_) => const ProfilePage()));
       }),
       _ActionData(Icons.memory, '记忆', () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const MemoryPage()));
+        Navigator.push(context, cozeFadeRoute(builder: (_) => const MemoryPage()));
       }),
       _ActionData(Icons.auto_awesome, '技能', () {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const SkillStorePage()));
+        Navigator.push(context, cozeFadeRoute(builder: (_) => const SkillStorePage()));
       }),
     ];
 
@@ -303,24 +304,14 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       confirmDismiss: (direction) async {
-        return await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: const Text('删除对话', style: TextStyle(fontWeight: FontWeight.bold)),
-            content: Text('确定删除与「${item.name}」的对话记录吗？'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('取消', style: TextStyle(color: CozeColors.fgDim)),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('删除', style: TextStyle(color: CozeColors.error)),
-              ),
-            ],
-          ),
-        ) ?? false;
+        return await CozeDialog.showConfirm(
+          context,
+          title: '删除对话',
+          content: '确定删除与「${item.name}」的对话记录吗？',
+          confirmText: '删除',
+          cancelText: '取消',
+          isDestructive: true,
+        );
       },
       onDismissed: (direction) {
         setState(() => _chatList.removeAt(index));
@@ -344,7 +335,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildChatItem(ProjectItem item) {
     return GestureDetector(
       onTap: () => Navigator.push(
-          context, MaterialPageRoute(builder: (_) => ChatPage(agentName: item.name, project: item))),
+          context, cozeFadeRoute(builder: (_) => ChatPage(agentName: item.name, project: item))),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg),
         padding: const EdgeInsets.all(CozeSpacing.md),
@@ -415,7 +406,7 @@ class _HomePageState extends State<HomePage> {
             GestureDetector(
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => ProjectDetailPage(project: item)),
+                cozeFadeRoute(builder: (_) => ProjectDetailPage(project: item)),
               ),
               child: Container(
                 width: 36,
@@ -448,7 +439,7 @@ class _HomePageState extends State<HomePage> {
             _dismissMenu();
             Navigator.push(
               context,
-              MaterialPageRoute(
+              cozeFadeRoute(
                 builder: (_) => const ChatPage(agentName: '新会话'),
               ),
             );

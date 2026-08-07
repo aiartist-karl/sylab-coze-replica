@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import '../theme/coze_colors.dart';
 import '../theme/coze_theme.dart';
 import '../services/auth_service.dart';
+import '../widgets/coze_dialog.dart';
 import 'skill_store_page.dart';
 import 'credits_detail_page.dart';
 
@@ -76,31 +77,12 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _changeNickname() async {
-    final controller = TextEditingController(text: _nickname);
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('修改昵称'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: '请输入新昵称',
-            border: OutlineInputBorder(),
-          ),
-          maxLength: 20,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('取消'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: const Text('确定'),
-          ),
-        ],
-      ),
+    final result = await CozeDialog.showInput(
+      context,
+      title: '修改昵称',
+      hintText: '请输入新昵称',
+      initialValue: _nickname,
+      confirmText: '确定',
     );
     if (result != null && result.isNotEmpty) {
       final prefs = await SharedPreferences.getInstance();
@@ -243,7 +225,7 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         const SizedBox(height: CozeSpacing.xxl),
         _section('常用功能', [
-          _F(Icons.auto_awesome, '技能商店', CozeColors.brand5, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SkillStorePage()))),
+          _F(Icons.auto_awesome, '技能商店', CozeColors.brand5, () => Navigator.push(context, cozeFadeRoute((_) => const SkillStorePage()))),
           _F(Icons.favorite_outline, '我的收藏', CozeColors.error, () => _toast('功能开发中')),
         ]),
         const SizedBox(height: CozeSpacing.lg),
@@ -312,13 +294,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _showCreditsDetail() {
     Navigator.push(
       context,
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 300),
-        pageBuilder: (context, animation, secondaryAnimation) => const CreditsDetailPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
+      cozeFadeRoute((_) => const CreditsDetailPage()),
     );
   }
 
