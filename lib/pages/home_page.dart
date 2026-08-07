@@ -84,39 +84,43 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg, vertical: CozeSpacing.md),
       child: Row(
         children: [
-          // Avatar with red dot
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: const BoxDecoration(
-                  color: CozeColors.infoBlue,
-                  shape: BoxShape.circle,
-                ),
-                child: const Center(
-                  child: Text('冯',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: CozeFontSize.s16,
-                          fontWeight: FontWeight.w600)),
-                ),
-              ),
-              Positioned(
-                right: -2,
-                top: -2,
-                child: Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: CozeColors.error,
+          // Avatar with red dot — tap to open profile
+          GestureDetector(
+            onTap: () => Navigator.push(
+                context, MaterialPageRoute(builder: (_) => const ProfilePage())),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                    color: CozeColors.infoBlue,
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: const Center(
+                    child: Text('冯',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: CozeFontSize.s16,
+                            fontWeight: FontWeight.w600)),
                   ),
                 ),
-              ),
-            ],
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: CozeColors.error,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(width: CozeSpacing.md),
           // Username only — no "免费版" tag per user request
