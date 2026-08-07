@@ -68,14 +68,14 @@ class _CreditsDetailPageState extends State<CreditsDetailPage>
     {
       'name': '漫剧',
       'type': '云手机',
-      'typeColor': CozeColors.purple,
+      'typeColor': const Color(0xFF9C27B0),
       'time': '2026-08-07 00:20',
       'amount': -38085.12,
     },
     {
       'name': '新项目',
       'type': 'AI 编程',
-      'typeColor': CozeColors.orange,
+      'typeColor': const Color(0xFFFF8C00),
       'time': '2026-08-06 18:33',
       'amount': -57385.65,
     },
