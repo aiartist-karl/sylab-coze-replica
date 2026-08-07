@@ -19,20 +19,13 @@ jobs:
         with:
           flutter-version: '3.24.0'
           channel: 'stable'
-<<<<<<< HEAD
       - name: Generate Android project files
         run: flutter create --project-name coze_replica --org com.karl.ai --platforms=android .
-=======
->>>>>>> 378b244 (feat: Coze App UI replication - pixel-perfect Flutter clone)
       - run: flutter pub get
       - run: flutter build apk --release
       - uses: actions/upload-artifact@v4
         with:
-<<<<<<< HEAD
           name: app-release-apk
-=======
-          name: app-release
->>>>>>> 378b244 (feat: Coze App UI replication - pixel-perfect Flutter clone)
           path: build/app/outputs/flutter-apk/app-release.apk
 
   build-ios:
@@ -43,16 +36,11 @@ jobs:
         with:
           flutter-version: '3.24.0'
           channel: 'stable'
-<<<<<<< HEAD
       - name: Generate iOS project files
-        run: flutter create --project-name sylab_coze_replica --org com.karl.ai --platforms=ios .
+        run: flutter create --project-name coze_replica --org com.karl.ai --platforms=ios .
       - run: flutter pub get
       - run: flutter build ios --release --no-codesign
       - uses: actions/upload-artifact@v4
         with:
           name: app-release-ipa
           path: build/ios/iphoneos/Runner.app
-=======
-      - run: flutter pub get
-      - run: flutter build ios --release --no-codesign
->>>>>>> 378b244 (feat: Coze App UI replication - pixel-perfect Flutter clone)
