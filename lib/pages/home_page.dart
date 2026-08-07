@@ -40,6 +40,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             _buildUserBar(),
+            _buildCreditsBanner(),
             Expanded(child: _buildChatList()),
           ],
         ),
