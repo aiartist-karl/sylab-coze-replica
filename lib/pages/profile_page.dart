@@ -5,7 +5,6 @@ import '../services/auth_service.dart';
 import 'device_page.dart';
 import 'skill_store_page.dart';
 import 'history_page.dart';
-import 'settings_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -16,32 +15,28 @@ class ProfilePage extends StatelessWidget {
       backgroundColor: CozeColors.bgMax,
       appBar: AppBar(backgroundColor: CozeColors.bgMax, elevation: 0,
         leading: IconButton(icon: const Icon(Icons.arrow_back_ios, size: 20, color: CozeColors.fgPrimary), onPressed: () => Navigator.pop(context)),
-        title: const Text('我的', style: TextStyle(fontSize: CozeFontSize.s18, fontWeight: FontWeight.bold, color: CozeColors.fgPrimary)),
-        actions: [IconButton(icon: const Icon(Icons.settings_outlined, size: 22, color: CozeColors.fgDim),
-            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage())))]),
+        title: const Text('我的', style: TextStyle(fontSize: CozeFontSize.s18, fontWeight: FontWeight.bold, color: CozeColors.fgPrimary))),
       body: ListView(padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg), children: [
         const SizedBox(height: CozeSpacing.lg),
         // Profile card
-        GestureDetector(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage())),
-          child: Container(padding: const EdgeInsets.all(CozeSpacing.lg),
-            decoration: BoxDecoration(color: CozeColors.chipGray, borderRadius: CozeRadius.xxlBorder),
-            child: Row(children: [
-              Stack(clipBehavior: Clip.none, children: [
-                Container(width: 64, height: 64, decoration: const BoxDecoration(color: CozeColors.infoBlue, shape: BoxShape.circle),
-                    child: const Center(child: Text('冯', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w600)))),
-                Positioned(right: -2, bottom: -2, child: Container(width: 22, height: 22,
-                    decoration: BoxDecoration(color: CozeColors.bgMax, shape: BoxShape.circle, border: Border.all(color: CozeColors.strokePrimary)),
-                    child: const Icon(Icons.camera_alt, size: 12, color: CozeColors.fgDim))),
-              ]),
-              const SizedBox(width: CozeSpacing.lg),
-              const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Row(children: [Text('冯包包', style: TextStyle(fontSize: CozeFontSize.s20, fontWeight: FontWeight.bold, color: CozeColors.fgPrimary)),
-                    SizedBox(width: CozeSpacing.sm), Icon(Icons.edit, size: 14, color: CozeColors.fgDim)]),
-                SizedBox(height: 6),
-                Text('ID: user_fengbaobao', style: TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgDim)),
-              ])),
-              const Icon(Icons.chevron_right, size: 22, color: CozeColors.fgDim),
-            ]))),
+        Container(padding: const EdgeInsets.all(CozeSpacing.lg),
+          decoration: BoxDecoration(color: CozeColors.chipGray, borderRadius: CozeRadius.xxlBorder),
+          child: Row(children: [
+            Stack(clipBehavior: Clip.none, children: [
+              Container(width: 64, height: 64, decoration: const BoxDecoration(color: CozeColors.infoBlue, shape: BoxShape.circle),
+                  child: const Center(child: Text('冯', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w600)))),
+              Positioned(right: -2, bottom: -2, child: Container(width: 22, height: 22,
+                  decoration: BoxDecoration(color: CozeColors.bgMax, shape: BoxShape.circle, border: Border.all(color: CozeColors.strokePrimary)),
+                  child: const Icon(Icons.camera_alt, size: 12, color: CozeColors.fgDim))),
+            ]),
+            const SizedBox(width: CozeSpacing.lg),
+            const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [Text('冯包包', style: TextStyle(fontSize: CozeFontSize.s20, fontWeight: FontWeight.bold, color: CozeColors.fgPrimary)),
+                  SizedBox(width: CozeSpacing.sm), Icon(Icons.edit, size: 14, color: CozeColors.fgDim)]),
+              SizedBox(height: 6),
+              Text('ID: user_fengbaobao', style: TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgDim)),
+            ])),
+          ])),
         const SizedBox(height: CozeSpacing.xl),
         // Credits card
         Container(padding: const EdgeInsets.all(CozeSpacing.lg),
@@ -65,24 +60,41 @@ class ProfilePage extends StatelessWidget {
             ]),
           ])),
         const SizedBox(height: CozeSpacing.xxl),
-        _featSection(context, '常用功能', [
+        // 常用功能
+        _section('常用功能', [
           _F(Icons.devices, '设备管理', CozeColors.infoBlue, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DevicePage()))),
           _F(Icons.auto_awesome, '技能商店', CozeColors.brand5, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SkillStorePage()))),
           _F(Icons.history, '历史对话', CozeColors.teal, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryPage()))),
           _F(Icons.favorite_outline, '我的收藏', CozeColors.error, () => _toast(context)),
-        ]),
+        ], context),
         const SizedBox(height: CozeSpacing.lg),
-        _featSection(context, '更多服务', [
+        // 更多服务
+        _section('更多服务', [
           _F(Icons.workspace_premium_outlined, '会员特权', CozeColors.warning, () => _toast(context)),
           _F(Icons.card_giftcard_outlined, '积分商城', const Color(0xFFFF6B6B), () => _toast(context)),
           _F(Icons.people_outline, '邀请好友', CozeColors.success, () => _toast(context)),
-        ]),
+        ], context),
         const SizedBox(height: CozeSpacing.lg),
-        _featSection(context, '关于与帮助', [
-          _F(Icons.info_outline, '关于Coze', CozeColors.fgDim, () => _toast(context, 'Coze Replica v1.0.0')),
-          _F(Icons.help_outline, '帮助与反馈', CozeColors.fgDim, () => _toast(context)),
-          _F(Icons.policy_outlined, '隐私政策', CozeColors.fgDim, () => _toast(context)),
-        ]),
+        // 账号设置
+        _section('账号', [
+          _F(Icons.person_outline, '个人信息', CozeColors.fgSecondary, () => _toast(context)),
+          _F(Icons.notifications_outlined, '通知设置', CozeColors.fgSecondary, () => _toast(context)),
+          _F(Icons.security_outlined, '隐私与安全', CozeColors.fgSecondary, () => _toast(context)),
+        ], context),
+        const SizedBox(height: CozeSpacing.lg),
+        // 通用设置
+        _section('通用', [
+          _F(Icons.language, '语言', CozeColors.fgSecondary, () => _toast(context)),
+          _F(Icons.dark_mode_outlined, '深色模式', CozeColors.fgSecondary, () => _toast(context)),
+          _F(Icons.storage_outlined, '存储空间', CozeColors.fgSecondary, () => _toast(context)),
+        ], context),
+        const SizedBox(height: CozeSpacing.lg),
+        // 关于
+        _section('关于', [
+          _F(Icons.info_outline, '关于Coze', CozeColors.fgSecondary, () => _toast(context, 'Coze Replica v1.1.0')),
+          _F(Icons.feedback_outlined, '意见反馈', CozeColors.fgSecondary, () => _toast(context)),
+          _F(Icons.description_outlined, '用户协议', CozeColors.fgSecondary, () => _toast(context)),
+        ], context),
         const SizedBox(height: CozeSpacing.xxl),
         if (auth.isLoggedIn) SizedBox(width: double.infinity, child: OutlinedButton(
           onPressed: () async { await auth.logout(); if (context.mounted) { Navigator.of(context).pop(); } },
@@ -105,7 +117,7 @@ class ProfilePage extends StatelessWidget {
     ]));
   }
 
-  Widget _featSection(BuildContext ctx, String title, List<_F> items) {
+  Widget _section(String title, List<_F> items, BuildContext ctx) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Padding(padding: const EdgeInsets.only(bottom: CozeSpacing.sm, left: CozeSpacing.xs),
           child: Text(title, style: const TextStyle(fontSize: CozeFontSize.s14, fontWeight: FontWeight.w600, color: CozeColors.fgSecondary))),
