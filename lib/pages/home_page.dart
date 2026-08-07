@@ -165,7 +165,7 @@ class _HomePageState extends State<HomePage> {
   // ─── Credits Banner ───
   Widget _buildCreditsBanner() {
     return GestureDetector(
-      onTap: () => Navigator.push(context, cozeFadeRoute((_) => const CreditsDetailPage())),
+      onTap: () => Navigator.push(context, cozeFadeRoute((_) => CreditsDetailPage())),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg, vertical: CozeSpacing.xs),
         padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.md, vertical: CozeSpacing.sm),
