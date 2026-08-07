@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _chatList = List<ProjectItem>.from(mockProjectList);
+    _chatList = <ProjectItem>[];
   }
 
   @override
@@ -136,32 +136,13 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          _iconButton(Icons.search, size: 22),
-          const SizedBox(width: CozeSpacing.sm),
+
           GestureDetector(
             key: _createBtnKey,
             onTap: _toggleCreateMenu,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                _iconButton(Icons.add_circle_outline, size: 22),
-                Positioned(
-                  right: -2,
-                  top: -2,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: CozeColors.error,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            child: _iconButton(Icons.add_circle_outline, size: 22),
           ),
-          const SizedBox(width: CozeSpacing.sm),
-          _iconButton(Icons.chevron_right, size: 22),
+
         ],
       ),
     );
@@ -176,27 +157,31 @@ class _HomePageState extends State<HomePage> {
 
   // ─── Credits Banner ───
   Widget _buildCreditsBanner() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg, vertical: CozeSpacing.xs),
-      padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.md, vertical: CozeSpacing.sm),
-      decoration: BoxDecoration(
-        color: CozeColors.lightOrange,
-        borderRadius: CozeRadius.xlBorder,
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const CreditsDetailPage()),
       ),
-      child: Row(
-        children: [
-          Icon(Icons.info_outline, size: 16, color: CozeColors.fgDim),
-          const SizedBox(width: CozeSpacing.sm),
-          const Text('1,500',
-              style: TextStyle(
-                  fontSize: CozeFontSize.s14,
-                  fontWeight: FontWeight.w600,
-                  color: CozeColors.fgPrimary)),
-          const Spacer(),
-          const Text('升级享受更多权益',
-              style: TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgDim)),
-          const Icon(Icons.chevron_right, size: 18, color: CozeColors.fgDim),
-        ],
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg, vertical: CozeSpacing.xs),
+        padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.md, vertical: CozeSpacing.sm),
+        decoration: BoxDecoration(
+          color: CozeColors.lightOrange,
+          borderRadius: CozeRadius.xlBorder,
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.info_outline, size: 16, color: CozeColors.fgDim),
+            const SizedBox(width: CozeSpacing.sm),
+            const Text('1,500',
+                style: TextStyle(
+                    fontSize: CozeFontSize.s14,
+                    fontWeight: FontWeight.w600,
+                    color: CozeColors.fgPrimary)),
+            const Spacer(),
+            const Icon(Icons.chevron_right, size: 18, color: CozeColors.fgDim),
+          ],
+        ),
       ),
     );
   }
@@ -440,13 +425,11 @@ class _HomePageState extends State<HomePage> {
             _dismissMenu();
             Navigator.push(
               context,
-              cozeFadeRoute(
-                (_) => const ChatPage(agentName: '新会话'),
+              MaterialPageRoute(
+                builder: (_) => const ChatPage(agentName: '新会话'),
               ),
             );
           }),
-      _MenuItem(Icons.smart_toy_outlined, '新建Agent', null,
-          () => dismissAndToast('功能开发中，敬请期待')),
     ];
 
     return Container(
