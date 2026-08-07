@@ -15,7 +15,9 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   bool _showAttachmentMenu = false;
+  bool _isVoiceMode = false;
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _textController = TextEditingController();
 
   // Mock messages
   final List<_Message> _messages = [
@@ -62,6 +64,13 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   @override
+  void dispose() {
+    _textController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final project = _resolvedProject;
     return Scaffold(
@@ -70,19 +79,22 @@ class _ChatPageState extends State<ChatPage> {
         backgroundColor: CozeColors.bgMax,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.menu, size: 22, color: CozeColors.fgPrimary),
-          onPressed: () {},
+          icon: const Icon(Icons.arrow_back_ios, size: 20, color: CozeColors.fgPrimary),
+          onPressed: () => Navigator.pop(context),
         ),
         title: GestureDetector(
-          onTap: () => Navigator.pop(context),
+          onTap: _renameProject,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(widget.agentName,
-                  style: const TextStyle(
-                      fontSize: CozeFontSize.s18,
-                      fontWeight: FontWeight.bold,
-                      color: CozeColors.fgPrimary)),
+              Flexible(
+                child: Text(widget.agentName,
+                    style: const TextStyle(
+                        fontSize: CozeFontSize.s18,
+                        fontWeight: FontWeight.bold,
+                        color: CozeColors.fgPrimary),
+                    overflow: TextOverflow.ellipsis),
+              ),
               const Text(' >',
                   style: TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgDim)),
             ],
@@ -100,14 +112,6 @@ class _ChatPageState extends State<ChatPage> {
                 MaterialPageRoute(builder: (_) => ProjectDetailPage(project: project)),
               ),
             ),
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline, size: 22, color: CozeColors.fgDim),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_horiz, size: 22, color: CozeColors.fgDim),
-            onPressed: () {},
-          ),
         ],
       ),
       body: Column(
@@ -159,6 +163,44 @@ class _ChatPageState extends State<ChatPage> {
           if (_showAttachmentMenu) _buildAttachmentMenu(),
           // Bottom input area
           _buildInputArea(),
+        ],
+      ),
+    );
+  }
+
+  // ─── Rename Project Dialog ───
+  void _renameProject() {
+    final controller = TextEditingController(text: widget.agentName);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('修改项目名称'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: '输入新项目名称',
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () {
+              final newName = controller.text.trim();
+              if (newName.isNotEmpty) {
+                // In real app, update project name via API
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('项目名称已修改为「$newName」'), duration: const Duration(seconds: 1)),
+                );
+                Navigator.pop(ctx);
+              }
+            },
+            child: const Text('保存'),
+          ),
         ],
       ),
     );
@@ -274,7 +316,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  // ─── Attachment Menu (only Image) ───
+  // ─── Attachment Menu (only Image) ──
   Widget _buildAttachmentMenu() {
     return Container(
       margin: const EdgeInsets.fromLTRB(CozeSpacing.lg, 0, CozeSpacing.lg, CozeSpacing.sm),
@@ -317,7 +359,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  // ─── Bottom Input Area (text input) ──
+  // ── Bottom Input Area ───
   Widget _buildInputArea() {
     return Container(
       padding: const EdgeInsets.fromLTRB(CozeSpacing.md, CozeSpacing.sm, CozeSpacing.md, CozeSpacing.lg),
@@ -351,41 +393,60 @@ class _ChatPageState extends State<ChatPage> {
             ),
             const SizedBox(width: CozeSpacing.sm),
             Expanded(
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: '输入消息...',
-                  hintStyle: TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgDim),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: CozeSpacing.md),
-                ),
-                style: const TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgPrimary),
-                maxLines: null,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (text) {
-                  if (text.trim().isNotEmpty) {
-                    setState(() {
-                      _messages.add(_Message(isUser: true, content: text.trim()));
-                    });
-                    // Scroll to bottom
-                    Future.delayed(const Duration(milliseconds: 100), () {
-                      _scrollController.animateTo(
-                        _scrollController.position.maxScrollExtent,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    });
-                  }
+              child: GestureDetector(
+                onTap: () {
+                  // Tap: switch to text input mode (show keyboard)
+                  setState(() => _isVoiceMode = false);
+                  // Show keyboard by focusing text field
+                  _showTextFieldKeyboard();
                 },
+                onLongPress: () {
+                  // Long press: show voice input overlay
+                  _showVoiceInputOverlay();
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.md, vertical: CozeSpacing.md),
+                  decoration: BoxDecoration(
+                    color: CozeColors.chipGray,
+                    borderRadius: CozeRadius.pillBorder,
+                  ),
+                  child: _isVoiceMode
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.mic, size: 20, color: CozeColors.brand5),
+                            const SizedBox(width: 6),
+                            const Text('按住说话',
+                                style: TextStyle(
+                                    fontSize: CozeFontSize.s16, color: CozeColors.fgPrimary)),
+                          ],
+                        )
+                      : const Center(
+                          child: Text('输入消息...',
+                              style: TextStyle(
+                                  fontSize: CozeFontSize.s16, color: CozeColors.fgDim)),
+                        ),
+                ),
               ),
             ),
             const SizedBox(width: CozeSpacing.sm),
             GestureDetector(
               onTap: () {
-                // Send message
-                // In real app, send to backend
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('消息发送功能开发中'), duration: Duration(seconds: 1)),
-                );
+                // Send text message
+                final text = _textController.text.trim();
+                if (text.isNotEmpty) {
+                  setState(() {
+                    _messages.add(_Message(isUser: true, content: text));
+                  });
+                  _textController.clear();
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    _scrollController.animateTo(
+                      _scrollController.position.maxScrollExtent,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  });
+                }
               },
               child: Container(
                 width: 32,
@@ -400,6 +461,118 @@ class _ChatPageState extends State<ChatPage> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showTextFieldKeyboard() {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        final controller = TextEditingController();
+        return AlertDialog(
+          title: const Text('发送消息'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              hintText: '输入消息...',
+              border: OutlineInputBorder(),
+            ),
+            autofocus: true,
+            maxLines: 4,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () {
+                final text = controller.text.trim();
+                if (text.isNotEmpty) {
+                  setState(() {
+                    _messages.add(_Message(isUser: true, content: text));
+                  });
+                }
+                Navigator.pop(ctx);
+                Future.delayed(const Duration(milliseconds: 100), () {
+                  _scrollController.animateTo(
+                    _scrollController.position.maxScrollExtent,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                });
+              },
+              child: const Text('发送'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showVoiceInputOverlay() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        bool isRecording = false;
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) => Dialog(
+            child: Container(
+              width: MediaQuery.of(ctx).size.width * 0.8,
+              padding: const EdgeInsets.all(CozeSpacing.xl),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onLongPressStart: (_) {
+                      setDialogState(() => isRecording = true);
+                    },
+                    onLongPressEnd: (_) {
+                      setDialogState(() => isRecording = false);
+                      // In real app: stop recording and send
+                      Navigator.pop(ctx);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('语音发送功能对接中'), duration: Duration(seconds: 1)),
+                      );
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: CozeSpacing.xl),
+                      decoration: BoxDecoration(
+                        color: isRecording ? CozeColors.error.withOpacity(0.1) : CozeColors.chipGray,
+                        borderRadius: CozeRadius.xxlBorder,
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            isRecording ? Icons.mic : Icons.mic_none,
+                            size: 48,
+                            color: isRecording ? CozeColors.error : CozeColors.fgSecondary,
+                          ),
+                          const SizedBox(height: CozeSpacing.md),
+                          Text(
+                            isRecording ? '松开 结束录音' : '按住 开始说话',
+                            style: TextStyle(
+                              fontSize: CozeFontSize.s16,
+                              color: isRecording ? CozeColors.error : CozeColors.fgPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: CozeSpacing.md),
+                  const Text(
+                    '对接后端语音API后，按住说话即可直接发送语音消息',
+                    style: TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.dimText),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
