@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/coze_colors.dart';
 import '../theme/coze_theme.dart';
 import '../services/auth_service.dart';
-import 'device_page.dart';
 import 'skill_store_page.dart';
-import 'history_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -38,7 +36,7 @@ class ProfilePage extends StatelessWidget {
             ])),
           ])),
         const SizedBox(height: CozeSpacing.xl),
-        // Credits card
+        // Credits card with consumption details
         Container(padding: const EdgeInsets.all(CozeSpacing.lg),
           decoration: BoxDecoration(
             gradient: const LinearGradient(colors: [Color(0xFFFFF8F0), Color(0xFFFFFDF5)]),
@@ -48,23 +46,49 @@ class ProfilePage extends StatelessWidget {
               const Icon(Icons.stars, size: 24, color: Color(0xFFFFB800)),
               const SizedBox(width: CozeSpacing.sm),
               const Expanded(child: Text('我的积分', style: TextStyle(fontSize: CozeFontSize.s16, fontWeight: FontWeight.w600, color: CozeColors.fgPrimary))),
-              Container(padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.md, vertical: 4),
-                decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFFFFB800), Color(0xFFFF8C00)]), borderRadius: CozeRadius.pillBorder),
-                child: const Text('升级Pro', style: TextStyle(fontSize: CozeFontSize.s12, fontWeight: FontWeight.w600, color: Colors.white))),
             ]),
             const SizedBox(height: CozeSpacing.lg),
+            // Current balance
             Row(children: [
-              _stat('当前积分', '1,500'), Container(width: 1, height: 32, color: CozeColors.separator),
-              _stat('本月消耗', '2,300'), Container(width: 1, height: 32, color: CozeColors.separator),
-              _stat('每日赠送', '100'),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('当前余额', style: TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.fgDim)),
+                const SizedBox(height: 4),
+                Text('1,500', style: TextStyle(fontSize: CozeFontSize.s24, fontWeight: FontWeight.bold, color: CozeColors.fgPrimary)),
+              ])),
+              Container(width: 1, height: 40, color: CozeColors.separator),
+              const SizedBox(width: CozeSpacing.md),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('本月消耗', style: TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.fgDim)),
+                const SizedBox(height: 4),
+                Text('2,300', style: TextStyle(fontSize: CozeFontSize.s24, fontWeight: FontWeight.bold, color: CozeColors.error)),
+              ])),
             ]),
+            const SizedBox(height: CozeSpacing.lg),
+            // Consumption details button
+            GestureDetector(
+              onTap: () => _toast(context, '积分明细：\n8月7日 -100 对话消耗\n8月6日 -50 生图消耗\n8月5日 -200 视频生成\n8月4日 -150 对话消耗'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: CozeSpacing.md, horizontal: CozeSpacing.lg),
+                decoration: BoxDecoration(
+                  color: CozeColors.bgMax,
+                  borderRadius: CozeRadius.lg,
+                  border: Border.all(color: CozeColors.strokePrimary),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.receipt_long_outlined, size: 18, color: CozeColors.fgSecondary),
+                    const SizedBox(width: CozeSpacing.sm),
+                    const Text('查看消耗明细', style: TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgSecondary)),
+                  ],
+                ),
+              ),
+            ),
           ])),
         const SizedBox(height: CozeSpacing.xxl),
         // 常用功能
         _section('常用功能', [
-          _F(Icons.devices, '设备管理', CozeColors.infoBlue, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const DevicePage()))),
           _F(Icons.auto_awesome, '技能商店', CozeColors.brand5, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SkillStorePage()))),
-          _F(Icons.history, '历史对话', CozeColors.teal, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryPage()))),
           _F(Icons.favorite_outline, '我的收藏', CozeColors.error, () => _toast(context)),
         ], context),
         const SizedBox(height: CozeSpacing.lg),
@@ -84,16 +108,8 @@ class ProfilePage extends StatelessWidget {
         const SizedBox(height: CozeSpacing.lg),
         // 通用设置
         _section('通用', [
-          _F(Icons.language, '语言', CozeColors.fgSecondary, () => _toast(context)),
           _F(Icons.dark_mode_outlined, '深色模式', CozeColors.fgSecondary, () => _toast(context)),
           _F(Icons.storage_outlined, '存储空间', CozeColors.fgSecondary, () => _toast(context)),
-        ], context),
-        const SizedBox(height: CozeSpacing.lg),
-        // 关于
-        _section('关于', [
-          _F(Icons.info_outline, '关于Coze', CozeColors.fgSecondary, () => _toast(context, 'Coze Replica v1.1.0')),
-          _F(Icons.feedback_outlined, '意见反馈', CozeColors.fgSecondary, () => _toast(context)),
-          _F(Icons.description_outlined, '用户协议', CozeColors.fgSecondary, () => _toast(context)),
         ], context),
         const SizedBox(height: CozeSpacing.xxl),
         if (auth.isLoggedIn) SizedBox(width: double.infinity, child: OutlinedButton(
@@ -107,14 +123,6 @@ class ProfilePage extends StatelessWidget {
         const SizedBox(height: CozeSpacing.xxl),
       ]),
     );
-  }
-
-  Widget _stat(String label, String value) {
-    return Expanded(child: Column(children: [
-      Text(value, style: const TextStyle(fontSize: CozeFontSize.s18, fontWeight: FontWeight.bold, color: CozeColors.fgPrimary)),
-      const SizedBox(height: 4),
-      Text(label, style: const TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.fgDim)),
-    ]));
   }
 
   Widget _section(String title, List<_F> items, BuildContext ctx) {
@@ -136,7 +144,14 @@ class ProfilePage extends StatelessWidget {
   }
 
   void _toast(BuildContext ctx, [String msg = '功能开发中']) {
-    ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text(msg), duration: const Duration(seconds: 1)));
+    showDialog(
+      context: ctx,
+      builder: (ctx) => AlertDialog(
+        title: const Text('提示'),
+        content: Text(msg),
+        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('确定'))],
+      ),
+    );
   }
 }
 
