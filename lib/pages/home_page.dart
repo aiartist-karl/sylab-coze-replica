@@ -12,6 +12,7 @@ import 'project_page.dart';
 import 'world_page.dart';
 import 'history_page.dart';
 import 'memory_page.dart';
+import 'credits_detail_page.dart';
 import '../widgets/coze_dialog.dart';
 import 'profile_page.dart';
 
