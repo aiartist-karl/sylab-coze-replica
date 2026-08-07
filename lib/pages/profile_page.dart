@@ -294,7 +294,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _showCreditsDetail() {
     Navigator.push(
       context,
-      cozeFadeRoute((_) => const CreditsDetailPage()),
+      MaterialPageRoute(builder: (_) => const CreditsDetailPage()),
     );
   }
 
