@@ -5,7 +5,6 @@ import '../models/project_item.dart';
 import '../widgets/coze_dialog.dart';
 import 'project_detail_page.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
 class ChatPage extends StatefulWidget {
@@ -467,27 +466,10 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _pickFile() async {
     setState(() => _showAttachmentMenu = false);
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles();
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-        setState(() {
-          _messages.add(_Message(
-            isUser: true,
-            content: '',
-            filePath: file.path,
-            fileName: file.name,
-            fileType: 'file',
-          ));
-        });
-        _scrollToBottom();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('选择文件失败: $e'), duration: const Duration(seconds: 2)),
-        );
-      }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('文件上传功能开发中'), duration: Duration(seconds: 2)),
+      );
     }
   }
 
