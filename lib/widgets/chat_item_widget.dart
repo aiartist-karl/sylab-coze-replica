@@ -3,6 +3,7 @@ import '../theme/coze_colors.dart';
 import '../theme/coze_theme.dart';
 import '../models/project_item.dart';
 import 'project_detail_page.dart';
+import 'coze_dialog.dart';
 
 /// 会话 + 文件入口卡片
 /// 首页聊天列表中每个会话项：点击进入对话，点文件夹按钮进入文件管理
@@ -42,24 +43,13 @@ class ChatItemWidget extends StatelessWidget {
         ),
       ),
       confirmDismiss: (direction) async {
-        return await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: const Text('删除对话', style: TextStyle(fontWeight: FontWeight.bold)),
-            content: Text('确定删除与「${project.name}」的对话记录吗？'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('取消', style: TextStyle(color: CozeColors.fgDim)),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('删除', style: TextStyle(color: CozeColors.error)),
-              ),
-            ],
-          ),
-        ) ?? false;
+        return await CozeDialog.showConfirm(
+          context,
+          title: '删除对话',
+          content: '确定删除与「${project.name}」的对话记录吗？',
+          confirmText: '删除',
+          isDestructive: true,
+        );
       },
       onDismissed: (_) => onDelete(),
       child: GestureDetector(

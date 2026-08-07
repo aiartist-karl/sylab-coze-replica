@@ -373,41 +373,72 @@ class _ChatPageState extends State<ChatPage> {
             ),
             const SizedBox(width: CozeSpacing.sm),
             Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  // Tap: switch to text input mode (show keyboard)
-                  setState(() => _isVoiceMode = false);
-                  // Show keyboard by focusing text field
-                  _showTextFieldKeyboard();
-                },
-                onLongPress: () {
-                  // Long press: show voice input overlay
-                  _showVoiceInputOverlay();
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.md, vertical: CozeSpacing.md),
-                  decoration: BoxDecoration(
-                    color: CozeColors.chipGray,
-                    borderRadius: CozeRadius.pillBorder,
-                  ),
-                  child: _isVoiceMode
-                      ? Row(
+              child: _isVoiceMode
+                  ? GestureDetector(
+                      onTap: () => setState(() => _isVoiceMode = false),
+                      onLongPress: () => _showVoiceInputOverlay(),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.md, vertical: CozeSpacing.md),
+                        decoration: BoxDecoration(
+                          color: CozeColors.chipGray,
+                          borderRadius: CozeRadius.pillBorder,
+                        ),
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.mic, size: 20, color: CozeColors.brand5),
-                            const SizedBox(width: 6),
-                            const Text('按住说话',
+                            Icon(Icons.mic, size: 20, color: CozeColors.brand5),
+                            SizedBox(width: 6),
+                            Text('按住说话',
                                 style: TextStyle(
                                     fontSize: CozeFontSize.s16, color: CozeColors.fgPrimary)),
                           ],
-                        )
-                      : const Center(
-                          child: Text('输入消息...',
-                              style: TextStyle(
-                                  fontSize: CozeFontSize.s16, color: CozeColors.fgDim)),
                         ),
-                ),
-              ),
+                      ),
+                    )
+                  : TextField(
+                      controller: _textController,
+                      autofocus: false,
+                      maxLines: 4,
+                      minLines: 1,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (text) {
+                        if (text.trim().isNotEmpty) {
+                          setState(() {
+                            _messages.add(_Message(isUser: true, content: text.trim()));
+                          });
+                          _textController.clear();
+                          Future.delayed(const Duration(milliseconds: 100), () {
+                            _scrollController.animateTo(
+                              _scrollController.position.maxScrollExtent,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          });
+                        }
+                      },
+                      onTap: () => setState(() => _isVoiceMode = false),
+                      style: const TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgPrimary),
+                      decoration: InputDecoration(
+                        hintText: '输入消息...',
+                        hintStyle: const TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgDim),
+                        filled: true,
+                        fillColor: CozeColors.chipGray,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: CozeSpacing.md, vertical: CozeSpacing.md),
+                        border: OutlineInputBorder(
+                          borderRadius: CozeRadius.pillBorder,
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: CozeRadius.pillBorder,
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: CozeRadius.pillBorder,
+                          borderSide: BorderSide.none,
+                        ),
+                        isDense: true,
+                      ),
+                    ),
             ),
             const SizedBox(width: CozeSpacing.sm),
             GestureDetector(
@@ -442,29 +473,6 @@ class _ChatPageState extends State<ChatPage> {
         ),
       ),
     );
-  }
-
-  void _showTextFieldKeyboard() {
-    CozeDialog.showInput(
-      context,
-      title: '发送消息',
-      hintText: '输入消息...',
-      maxLines: 4,
-      confirmText: '发送',
-    ).then((text) {
-      if (text != null && text.isNotEmpty) {
-        setState(() {
-          _messages.add(_Message(isUser: true, content: text));
-        });
-        Future.delayed(const Duration(milliseconds: 100), () {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        });
-      }
-    });
   }
 
   void _showVoiceInputOverlay() {
