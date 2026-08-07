@@ -112,7 +112,9 @@ class _CreditsDetailPageState extends State<CreditsDetailPage> {
           ],
         ),
       ),
-      body: ListView(
+      body: Container(
+        color: CozeColors.bgMax,
+        child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg, vertical: CozeSpacing.lg),
           children: [
             _buildStatsCard(),
@@ -121,6 +123,7 @@ class _CreditsDetailPageState extends State<CreditsDetailPage> {
             const SizedBox(height: CozeSpacing.md),
             _buildRecordsList(),
           ],
+        ),
       ),
     );
   }
