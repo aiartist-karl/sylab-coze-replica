@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import '../theme/coze_colors.dart';
 import '../theme/coze_theme.dart';
+import '../models/project_item.dart';
+import 'project_detail_page.dart';
 
 class ChatPage extends StatefulWidget {
   final String agentName;
-  const ChatPage({super.key, required this.agentName});
+  final ProjectItem? project; // Optional: linked project for file management
+  const ChatPage({super.key, required this.agentName, this.project});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -48,8 +51,19 @@ class _ChatPageState extends State<ChatPage> {
     ),
   ];
 
+  /// Resolve project — use passed project or find from mock data
+  ProjectItem? get _resolvedProject {
+    if (widget.project != null) return widget.project;
+    // Try to find by agent name
+    for (final p in mockProjectList) {
+      if (p.name == widget.agentName) return p;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final project = _resolvedProject;
     return Scaffold(
       backgroundColor: CozeColors.bgMax,
       appBar: AppBar(
@@ -76,6 +90,16 @@ class _ChatPageState extends State<ChatPage> {
         ),
         titleSpacing: 0,
         actions: [
+          // File management button
+          if (project != null)
+            IconButton(
+              icon: Icon(Icons.folder_outlined, size: 22, color: CozeColors.fgDim),
+              tooltip: '项目文件',
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => ProjectDetailPage(project: project)),
+              ),
+            ),
           IconButton(
             icon: const Icon(Icons.add_circle_outline, size: 22, color: CozeColors.fgDim),
             onPressed: () {},
@@ -95,7 +119,7 @@ class _ChatPageState extends State<ChatPage> {
                 ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg, vertical: CozeSpacing.sm),
-                  itemCount: _messages.length + 2, // +date separator + spacer
+                  itemCount: _messages.length + 2,
                   itemBuilder: (context, index) {
                     if (index == 0) return _buildDateSeparator();
                     final msgIndex = index - 1;
@@ -191,7 +215,6 @@ class _ChatPageState extends State<ChatPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar
           Container(
             width: 36,
             height: 36,
@@ -202,17 +225,14 @@ class _ChatPageState extends State<ChatPage> {
             child: Center(child: Text(msg.avatar!, style: const TextStyle(fontSize: 18))),
           ),
           const SizedBox(width: CozeSpacing.sm),
-          // Content
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Sender + time
                 Text('${msg.senderName} ${msg.time}',
                     style: const TextStyle(
                         fontSize: CozeFontSize.s12, color: CozeColors.dimText)),
                 const SizedBox(height: CozeSpacing.xs),
-                // Bubble
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: CozeSpacing.lg, vertical: CozeSpacing.md),
@@ -226,7 +246,6 @@ class _ChatPageState extends State<ChatPage> {
                       Text(msg.content,
                           style: const TextStyle(
                               fontSize: CozeFontSize.s16, color: CozeColors.fgPrimary, height: 1.5)),
-                      // @mention tag
                       if (msg.hasMention) ...[
                         const SizedBox(height: CozeSpacing.sm),
                         Container(
@@ -328,7 +347,6 @@ class _ChatPageState extends State<ChatPage> {
         ),
         child: Row(
           children: [
-            // Plus button with red dot
             GestureDetector(
               onTap: () => setState(() => _showAttachmentMenu = !_showAttachmentMenu),
               child: Stack(
@@ -349,7 +367,6 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
             const SizedBox(width: CozeSpacing.sm),
-            // "Press to speak" button
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: CozeSpacing.md),

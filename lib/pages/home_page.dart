@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import '../theme/coze_colors.dart';
 import '../theme/coze_theme.dart';
-import '../models/chat_item.dart';
+import '../models/project_item.dart';
 import 'skill_store_page.dart';
 import 'chat_page.dart';
 import 'search_page.dart';
 import 'project_page.dart';
+import 'project_detail_page.dart';
 import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,12 +19,12 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final GlobalKey _createBtnKey = GlobalKey();
   OverlayEntry? _menuOverlay;
-  late List<ChatListItem> _chatList;
+  late List<ProjectItem> _chatList;
 
   @override
   void initState() {
     super.initState();
-    _chatList = List<ChatListItem>.from(mockChatList);
+    _chatList = List<ProjectItem>.from(mockProjectList);
   }
 
   @override
@@ -78,13 +79,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ─── User Info Bar (~70px) ───
+  // ─── User Info Bar ───
   Widget _buildUserBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg, vertical: CozeSpacing.md),
       child: Row(
         children: [
-          // Avatar with red dot — tap to open profile
           GestureDetector(
             onTap: () => Navigator.push(
                 context, MaterialPageRoute(builder: (_) => const ProfilePage())),
@@ -123,7 +123,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const SizedBox(width: CozeSpacing.md),
-          // Username only — no "免费版" tag per user request
           const Expanded(
             child: Text(
               '冯包包',
@@ -134,7 +133,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          // Right icons
           _iconButton(Icons.search, size: 22),
           const SizedBox(width: CozeSpacing.sm),
           GestureDetector(
@@ -200,7 +198,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ─── Quick Action Buttons (horizontal scroll) ───
+  // ─── Quick Action Buttons ───
   Widget _buildQuickActions() {
     final actions = [
       _ActionData(Icons.chat_bubble_outline, '项目', () {
@@ -249,7 +247,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ─── Chat List ───
+  // ─── Chat List (sessions = projects) ───
   Widget _buildChatList() {
     if (_chatList.isEmpty) {
       return Center(
@@ -276,11 +274,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ─── Dismissible wrapper for swipe-to-delete ───
+  // ─── Dismissible wrapper ───
   Widget _buildDismissibleChatItem(int index) {
     final item = _chatList[index];
     return Dismissible(
-      key: ValueKey('chat_${item.name}_$index'),
+      key: ValueKey('chat_${item.id}_$index'),
       direction: DismissDirection.endToStart,
       background: Container(
         margin: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg),
@@ -301,13 +299,11 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       confirmDismiss: (direction) async {
-        // Show confirmation dialog
         return await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: Text('删除对话',
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: const Text('删除对话', style: TextStyle(fontWeight: FontWeight.bold)),
             content: Text('确定删除与「${item.name}」的对话记录吗？'),
             actions: [
               TextButton(
@@ -323,10 +319,7 @@ class _HomePageState extends State<HomePage> {
         ) ?? false;
       },
       onDismissed: (direction) {
-        setState(() {
-          _chatList.removeAt(index);
-        });
-        // Show undo snackbar
+        setState(() => _chatList.removeAt(index));
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('已删除与「${item.name}」的对话'),
@@ -334,11 +327,7 @@ class _HomePageState extends State<HomePage> {
             action: SnackBarAction(
               label: '撤销',
               textColor: CozeColors.brand5,
-              onPressed: () {
-                setState(() {
-                  _chatList.insert(index, item);
-                });
-              },
+              onPressed: () => setState(() => _chatList.insert(index, item)),
             ),
           ),
         );
@@ -347,10 +336,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildChatItem(ChatListItem item) {
+  // ─── Chat Item Card ───
+  Widget _buildChatItem(ProjectItem item) {
     return GestureDetector(
       onTap: () => Navigator.push(
-          context, MaterialPageRoute(builder: (_) => ChatPage(agentName: item.name))),
+          context, MaterialPageRoute(builder: (_) => ChatPage(agentName: item.name, project: item))),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg),
         padding: const EdgeInsets.all(CozeSpacing.md),
@@ -360,6 +350,7 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Row(
           children: [
+            // Avatar
             Container(
               width: 48,
               height: 48,
@@ -370,6 +361,7 @@ class _HomePageState extends State<HomePage> {
               child: Center(child: Text(item.avatar, style: const TextStyle(fontSize: 22))),
             ),
             const SizedBox(width: CozeSpacing.md),
+            // Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,17 +376,51 @@ class _HomePageState extends State<HomePage> {
                                 color: CozeColors.fgPrimary),
                             overflow: TextOverflow.ellipsis),
                       ),
-                      Text(item.time,
+                      Text(item.lastActiveTime,
                           style: const TextStyle(
                               fontSize: CozeFontSize.s12, color: CozeColors.dimText)),
                     ],
                   ),
                   const SizedBox(height: CozeSpacing.xs),
-                  Text(item.preview,
+                  Text(item.lastMessage,
                       style: const TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgDim),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis),
+                  // File count indicator
+                  if (item.files.isNotEmpty) ...[
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        Icon(Icons.folder_outlined, size: 11, color: CozeColors.dimText),
+                        const SizedBox(width: 3),
+                        Text(item.totalFileCount,
+                            style: const TextStyle(fontSize: 11, color: CozeColors.dimText)),
+                        const SizedBox(width: 6),
+                        ...item.recentFiles.take(3).map((f) => Padding(
+                          padding: const EdgeInsets.only(right: 3),
+                          child: Icon(fileTypeIcon(f.type), size: 10, color: fileTypeColor(f.type)),
+                        )),
+                      ],
+                    ),
+                  ],
                 ],
+              ),
+            ),
+            const SizedBox(width: CozeSpacing.sm),
+            // File management button — tap to view project files
+            GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => ProjectDetailPage(project: item)),
+              ),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: CozeColors.bgMax,
+                  borderRadius: CozeRadius.xlBorder,
+                ),
+                child: Icon(Icons.folder_outlined, size: 18, color: CozeColors.fgDim),
               ),
             ),
           ],
@@ -403,7 +429,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // ─── Create Menu (popup content) ───
+  // ─── Create Menu ───
   Widget _buildCreateMenu() {
     void dismissAndToast(String msg) {
       _dismissMenu();
@@ -465,7 +491,6 @@ class _MenuItem {
 }
 
 /// Overlay widget that positions the menu below the anchor button.
-/// Covers the full screen with a transparent backdrop for dismissal.
 class _OverlayMenu extends StatelessWidget {
   final Rect anchorRect;
   final Widget Function() menuBuilder;
@@ -481,15 +506,13 @@ class _OverlayMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final menuWidth = 200.0;
-    final menuEstHeight = 220.0; // approximate
+    final menuEstHeight = 220.0;
     final margin = 8.0;
 
-    // Position: right-aligned to the anchor button, below it
     double left = anchorRect.right - menuWidth;
     if (left < margin) left = margin;
 
     double top = anchorRect.bottom + margin;
-    // If menu would overflow bottom, show above anchor
     if (top + menuEstHeight > screenSize.height - margin) {
       top = anchorRect.top - menuEstHeight - margin;
       if (top < margin) top = margin;
@@ -497,12 +520,10 @@ class _OverlayMenu extends StatelessWidget {
 
     return Stack(
       children: [
-        // Transparent backdrop — tap to dismiss
         GestureDetector(
           onTap: onDismiss,
           child: Container(color: Colors.transparent),
         ),
-        // Positioned menu
         Positioned(
           left: left,
           top: top,

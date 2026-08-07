@@ -87,7 +87,12 @@ class ApiService {
       );
       if (response.data is ResponseBody) {
         final body = response.data as ResponseBody;
-        await for (final line in body.stream.transform(utf8.decoder).transform(const LineSplitter())) {
+        final chunks = <int>[];
+        await for (final chunk in body.stream) {
+          chunks.addAll(chunk);
+        }
+        final decoded = utf8.decode(chunks);
+        for (final line in const LineSplitter().convert(decoded)) {
           if (line.startsWith('data: ')) {
             final data = line.substring(6);
             if (data == '[DONE]') return;
