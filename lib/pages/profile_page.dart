@@ -1,29 +1,77 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 import '../theme/coze_colors.dart';
 import '../theme/coze_theme.dart';
 import '../services/auth_service.dart';
-import '../services/user_service.dart';
 import '../widgets/coze_dialog.dart';
-
+import 'credits_detail_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
-
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final UserService _userService = UserService();
+  String _nickname = '冯包包';
+  String? _avatarPath;
+  final ImagePicker _imagePicker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedName = prefs.getString('user_nickname');
+    final savedAvatar = prefs.getString('user_avatar_path');
+    if (savedName != null) {
+      setState(() => _nickname = savedName);
+    }
+    if (savedAvatar != null) {
+      setState(() => _avatarPath = savedAvatar);
+    }
+  }
 
   Future<void> _changeAvatar() async {
-    final success = await _userService.changeAvatar();
-    if (!success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('头像更新失败'), duration: Duration(seconds: 2)),
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+        maxWidth: 512,
+        maxHeight: 512,
       );
+      if (image == null) return;
+
+      final bytes = await image.readAsBytes();
+      final dir = Directory('${(await _getAppDir()).path}/profile');
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+      final savePath = '${dir.path}/avatar.jpg';
+      final file = File(savePath);
+      await file.writeAsBytes(bytes);
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_avatar_path', savePath);
+
+      setState(() => _avatarPath = savePath);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('头像更新失败: $e'), duration: const Duration(seconds: 2)),
+        );
+      }
     }
+  }
+
+  Future<Directory> _getAppDir() async {
+    return await getApplicationDocumentsDirectory();
   }
 
   Future<void> _changeNickname() async {
@@ -31,20 +79,24 @@ class _ProfilePageState extends State<ProfilePage> {
       context,
       title: '修改昵称',
       hintText: '请输入新昵称',
-      initialValue: _userService.nickname,
+      initialValue: _nickname,
       confirmText: '确定',
     );
     if (result != null && result.isNotEmpty) {
-      await _userService.changeNickname(result);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_nickname', result);
+      setState(() => _nickname = result);
     }
   }
 
   Widget _buildAvatar() {
-    final avatarFile = _userService.avatarFile;
-    if (avatarFile != null) {
-      return ClipOval(
-        child: Image.file(avatarFile, width: 64, height: 64, fit: BoxFit.cover),
-      );
+    if (_avatarPath != null) {
+      final file = File(_avatarPath!);
+      if (file.existsSync()) {
+        return ClipOval(
+          child: Image.file(file, width: 64, height: 64, fit: BoxFit.cover),
+        );
+      }
     }
     return Container(
       width: 64,
@@ -52,7 +104,7 @@ class _ProfilePageState extends State<ProfilePage> {
       decoration: const BoxDecoration(color: CozeColors.infoBlue, shape: BoxShape.circle),
       child: Center(
         child: Text(
-          _userService.initials,
+          _nickname.isNotEmpty ? _nickname[0] : '?',
           style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w600),
         ),
       ),
@@ -71,64 +123,18 @@ class _ProfilePageState extends State<ProfilePage> {
           icon: const Icon(Icons.arrow_back_ios, size: 20, color: CozeColors.fgPrimary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('我的',
-            style: TextStyle(
-                fontSize: CozeFontSize.s18,
-                fontWeight: FontWeight.bold,
-                color: CozeColors.fgPrimary)),
-
+        title: const Text('我的', style: TextStyle(fontSize: CozeFontSize.s18, fontWeight: FontWeight.bold, color: CozeColors.fgPrimary)),
       ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg),
-        children: [
-          const SizedBox(height: CozeSpacing.lg),
-          // ─── User Profile Card ───
-          _buildProfileCard(context),
-          const SizedBox(height: CozeSpacing.xl),
-          // ─── Credits Card ───
-          _buildMembershipCard(context),
-          const SizedBox(height: CozeSpacing.xxl),
-          // ─── Logout Button ───
-          if (auth.isLoggedIn)
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () async {
-                  await auth.logout();
-                  if (context.mounted) {
-                    Navigator.of(context).pop();
-                  }
-                },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: CozeColors.error,
-                  side: const BorderSide(color: CozeColors.error),
-                  shape: RoundedRectangleBorder(borderRadius: CozeRadius.xlBorder),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                child: const Text('退出登录', style: TextStyle(fontSize: CozeFontSize.s16)),
-              ),
-            ),
-          const SizedBox(height: CozeSpacing.xxl),
-        ],
-      ),
-    );
-  }
-
-  // ─── Profile Card ───
-  Widget _buildProfileCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(CozeSpacing.lg),
-      decoration: BoxDecoration(
-        color: CozeColors.chipGray,
-        borderRadius: CozeRadius.xxlBorder,
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: _changeAvatar,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
+      body: ListView(padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg), children: [
+        const SizedBox(height: CozeSpacing.lg),
+        // Profile card
+        Container(
+          padding: const EdgeInsets.all(CozeSpacing.lg),
+          decoration: BoxDecoration(color: CozeColors.chipGray, borderRadius: CozeRadius.xxlBorder),
+          child: Row(children: [
+            GestureDetector(
+              onTap: _changeAvatar,
+              child: Stack(clipBehavior: Clip.none, children: [
                 _buildAvatar(),
                 Positioned(
                   right: -2,
@@ -139,180 +145,102 @@ class _ProfilePageState extends State<ProfilePage> {
                     decoration: BoxDecoration(
                       color: CozeColors.bgMax,
                       shape: BoxShape.circle,
-                      border: Border.all(color: CozeColors.strokePrimary, width: 1),
+                      border: Border.all(color: CozeColors.strokePrimary),
                     ),
                     child: const Icon(Icons.camera_alt, size: 12, color: CozeColors.fgDim),
                   ),
                 ),
-              ],
+              ]),
             ),
-          ),
-          const SizedBox(width: CozeSpacing.lg),
-          Expanded(
-            child: GestureDetector(
-              onTap: _changeNickname,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(_userService.nickname,
-                          style: const TextStyle(
-                              fontSize: CozeFontSize.s20,
-                              fontWeight: FontWeight.bold,
-                              color: CozeColors.fgPrimary)),
-                      const SizedBox(width: CozeSpacing.sm),
-                      const Icon(Icons.edit, size: 14, color: CozeColors.fgDim),
-                    ],
-                  ),
+            const SizedBox(width: CozeSpacing.lg),
+            Expanded(
+              child: GestureDetector(
+                onTap: _changeNickname,
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Row(children: [
+                    Text(_nickname, style: const TextStyle(fontSize: CozeFontSize.s20, fontWeight: FontWeight.bold, color: CozeColors.fgPrimary)),
+                    const SizedBox(width: CozeSpacing.sm),
+                    const Icon(Icons.edit, size: 14, color: CozeColors.fgDim),
+                  ]),
                   const SizedBox(height: 6),
-                  Text('ID: user_${_userService.nickname.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}',
-                      style: const TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgDim)),
-                ],
+                  Text('ID: user_${_nickname.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_')}', style: const TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgDim)),
+                ]),
               ),
             ),
-          ),
-          const Icon(Icons.chevron_right, size: 22, color: CozeColors.fgDim),
-        ],
-      ),
-    );
-  }
-
-  // ─── Membership Card ───
-  Widget _buildMembershipCard(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(CozeSpacing.lg),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFFF8F0), Color(0xFFFFFDF5)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          ]),
         ),
-        borderRadius: CozeRadius.xxlBorder,
-        border: Border.all(color: const Color(0xFFFFE4B5), width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
+        const SizedBox(height: CozeSpacing.xl),
+        // Credits card
+        Container(
+          padding: const EdgeInsets.all(CozeSpacing.lg),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [Color(0xFFFFF8F0), Color(0xFFFFFDF5)]),
+            borderRadius: CozeRadius.xxlBorder,
+            border: Border.all(color: const Color(0xFFFFE4B5)),
+          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
               const Icon(Icons.stars, size: 24, color: Color(0xFFFFB800)),
               const SizedBox(width: CozeSpacing.sm),
-              const Expanded(
-                child: Text('我的积分',
-                    style: TextStyle(
-                        fontSize: CozeFontSize.s16,
-                        fontWeight: FontWeight.w600,
-                        color: CozeColors.fgPrimary)),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.md, vertical: 4),
+              const Expanded(child: Text('我的积分', style: TextStyle(fontSize: CozeFontSize.s16, fontWeight: FontWeight.w600, color: CozeColors.fgPrimary))),
+            ]),
+            const SizedBox(height: CozeSpacing.lg),
+            Row(children: [
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('当前余额', style: TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.fgDim)),
+                const SizedBox(height: 4),
+                Text('1,500', style: TextStyle(fontSize: CozeFontSize.s24, fontWeight: FontWeight.bold, color: CozeColors.fgPrimary)),
+              ])),
+              Container(width: 1, height: 40, color: CozeColors.separator),
+              const SizedBox(width: CozeSpacing.md),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('本月消耗', style: TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.fgDim)),
+                const SizedBox(height: 4),
+                Text('2,300', style: TextStyle(fontSize: CozeFontSize.s24, fontWeight: FontWeight.bold, color: CozeColors.error)),
+              ])),
+            ]),
+            const SizedBox(height: CozeSpacing.lg),
+            GestureDetector(
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreditsDetailPage())),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: CozeSpacing.md, horizontal: CozeSpacing.lg),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFFB800), Color(0xFFFF8C00)],
-                  ),
-                  borderRadius: CozeRadius.pillBorder,
+                  color: CozeColors.bgMax,
+                  borderRadius: BorderRadius.all(CozeRadius.lg),
+                  border: Border.all(color: CozeColors.strokePrimary),
                 ),
-                child: const Text('升级Pro',
-                    style: TextStyle(
-                        fontSize: CozeFontSize.s12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.receipt_long_outlined, size: 18, color: CozeColors.fgSecondary),
+                    const SizedBox(width: CozeSpacing.sm),
+                    const Text('查看消耗明细', style: TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgSecondary)),
+                  ],
+                ),
               ),
-            ],
-          ),
-          const SizedBox(height: CozeSpacing.lg),
-          Row(
-            children: [
-              _creditStat('当前积分', '1,500'),
-              Container(width: 1, height: 32, color: CozeColors.separator),
-              _creditStat('本月消耗', '2,300'),
-              Container(width: 1, height: 32, color: CozeColors.separator),
-              _creditStat('每日赠送', '100'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _creditStat(String label, String value) {
-    return Expanded(
-      child: Column(
-        children: [
-          Text(value,
-              style: const TextStyle(
-                  fontSize: CozeFontSize.s18,
-                  fontWeight: FontWeight.bold,
-                  color: CozeColors.fgPrimary)),
-          const SizedBox(height: 4),
-          Text(label,
-              style: const TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.fgDim)),
-        ],
-      ),
-    );
-  }
-
-  // ─── Feature Section ───
-  Widget _buildFeatureSection(BuildContext context, String title, List<_FeatureItem> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: CozeSpacing.sm, left: CozeSpacing.xs),
-          child: Text(title,
-              style: const TextStyle(
-                  fontSize: CozeFontSize.s14,
-                  fontWeight: FontWeight.w600,
-                  color: CozeColors.fgSecondary)),
+            ),
+          ]),
         ),
-        Container(
-          decoration: BoxDecoration(
-            color: CozeColors.chipGray,
-            borderRadius: CozeRadius.xxlBorder,
-          ),
-          child: Column(
-            children: List.generate(items.length, (i) {
-              final item = items[i];
-              return Column(
-                children: [
-                  ListTile(
-                    leading: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: item.color.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(item.icon, size: 20, color: item.color),
-                    ),
-                    title: Text(item.label,
-                        style: const TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgPrimary)),
-                    trailing: const Icon(Icons.chevron_right, size: 20, color: CozeColors.dimText),
-                    onTap: item.onTap,
-                  ),
-                  if (i < items.length - 1)
-                    Divider(height: 1, color: CozeColors.strokePrimary, indent: 68),
-                ],
-              );
-            }),
+        const SizedBox(height: CozeSpacing.xxl),
+        // Logout button
+        if (auth.isLoggedIn) SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: () async {
+              await auth.logout();
+              if (context.mounted) Navigator.of(context).pop();
+            },
+            style: OutlinedButton.styleFrom(
+              foregroundColor: CozeColors.error,
+              side: const BorderSide(color: CozeColors.error),
+              shape: RoundedRectangleBorder(borderRadius: CozeRadius.xlBorder),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+            child: const Text('退出登录', style: TextStyle(fontSize: CozeFontSize.s16)),
           ),
         ),
-      ],
+        const SizedBox(height: CozeSpacing.xxl),
+      ]),
     );
   }
-
-  void _showToast(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), duration: const Duration(seconds: 1)),
-    );
-  }
-}
-
-class _FeatureItem {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-  const _FeatureItem(this.icon, this.label, this.color, this.onTap);
 }

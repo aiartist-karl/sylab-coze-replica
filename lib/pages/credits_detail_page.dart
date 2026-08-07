@@ -2,36 +2,87 @@ import 'package:flutter/material.dart';
 import '../theme/coze_colors.dart';
 import '../theme/coze_theme.dart';
 
-class CreditsDetailPage extends StatelessWidget {
+class CreditsDetailPage extends StatefulWidget {
   const CreditsDetailPage({super.key});
 
-  static const List<Map<String, dynamic>> _records = [
-    {'name': 'sylab', 'type': 'Agent 项目', 'time': '2026-08-07 18:14', 'amount': -61791.45},
-    {'name': '小小酥', 'type': 'Coze Agent', 'time': '2026-08-07 18:13', 'amount': -2223201.01},
-    {'name': '小小酥的新项目', 'type': 'Agent 项目', 'time': '2026-08-07 13:52', 'amount': -2096.38},
-    {'name': 'codex', 'type': '云电脑', 'time': '2026-08-07 00:21', 'amount': -6200.0},
-    {'name': '3d动漫', 'type': '云电脑', 'time': '2026-08-07 00:21', 'amount': -68400.0},
-    {'name': '漫剧', 'type': '云手机', 'time': '2026-08-07 00:20', 'amount': -38085.12},
-    {'name': '新项目', 'type': 'AI 编程', 'time': '2026-08-06 18:33', 'amount': -57385.65},
-  ];
+  @override
+  State<CreditsDetailPage> createState() => _CreditsDetailPageState();
+}
 
-  static const Map<String, double> _categories = {
-    'Agent 项目': 3367230.1,
-    '编程项目': 77944.971,
-    '视频项目': 0,
-    '云设备': 112685.12,
-    '会议': 0,
-    '其他': 0,
+class _CreditsDetailPageState extends State<CreditsDetailPage> {
+  // Mock stats data
+  final Map<String, dynamic> _stats = {
+    'totalUsage': 3557860.239,
+    'period': '近一个月',
+    'categories': {
+      'Agent 项目': 3367230.1,
+      '编程项目': 77944.971,
+      '视频项目': 0,
+      '云设备': 112685.12,
+      '会议': 0,
+      '其他': 0,
+    },
   };
 
-  static const double _totalUsage = 3557860.239;
+  // Mock consumption records
+  final List<Map<String, dynamic>> _records = [
+    {
+      'name': 'sylab',
+      'type': 'Agent 项目',
+      'typeColor': CozeColors.brand5,
+      'time': '2026-08-07 18:14',
+      'amount': -61791.45,
+    },
+    {
+      'name': '小小酥',
+      'type': 'Coze Agent',
+      'typeColor': CozeColors.brand5,
+      'time': '2026-08-07 18:13',
+      'amount': -2223201.01,
+    },
+    {
+      'name': '小小酥的新项目',
+      'type': 'Agent 项目',
+      'typeColor': CozeColors.brand5,
+      'time': '2026-08-07 13:52',
+      'amount': -2096.38,
+    },
+    {
+      'name': 'codex',
+      'type': '云电脑',
+      'typeColor': CozeColors.teal,
+      'time': '2026-08-07 00:21',
+      'amount': -6200,
+    },
+    {
+      'name': '3d动漫',
+      'type': '云电脑',
+      'typeColor': CozeColors.teal,
+      'time': '2026-08-07 00:21',
+      'amount': -68400,
+    },
+    {
+      'name': '漫剧',
+      'type': '云手机',
+      'typeColor': const Color(0xFF9C27B0),
+      'time': '2026-08-07 00:20',
+      'amount': -38085.12,
+    },
+    {
+      'name': '新项目',
+      'type': 'AI 编程',
+      'typeColor': const Color(0xFFFF8C00),
+      'time': '2026-08-06 18:33',
+      'amount': -57385.65,
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: CozeColors.bgMax,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: CozeColors.bgMax,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, size: 20, color: CozeColors.fgPrimary),
@@ -39,41 +90,50 @@ class CreditsDetailPage extends StatelessWidget {
         ),
         titleSpacing: 0,
         title: Row(
-          children: const [
-            Expanded(
+          children: [
+            const Expanded(
               child: Text('积分充值',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: CozeColors.fgDim)),
+                  style: TextStyle(
+                      fontSize: CozeFontSize.s16,
+                      fontWeight: FontWeight.w500,
+                      color: CozeColors.fgDim)),
             ),
-            SizedBox(width: 1, height: 16, child: ColoredBox(color: CozeColors.strokePrimary)),
-            Expanded(
+            Container(width: 1, height: 16, color: CozeColors.strokePrimary),
+            const Expanded(
               child: Text('积分消耗',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: CozeColors.fgPrimary)),
+                  style: TextStyle(
+                      fontSize: CozeFontSize.s16,
+                      fontWeight: FontWeight.bold,
+                      color: CozeColors.fgPrimary)),
             ),
-            Expanded(child: SizedBox()),
+            const Expanded(child: SizedBox()),
           ],
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildStatsCard(),
-          const SizedBox(height: 16),
-          _buildSectionHeader(),
-          const SizedBox(height: 12),
-          _buildRecordsList(),
-        ],
+          padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg, vertical: CozeSpacing.lg),
+          children: [
+            _buildStatsCard(),
+            const SizedBox(height: CozeSpacing.lg),
+            _buildSectionHeader(),
+            const SizedBox(height: CozeSpacing.md),
+            _buildRecordsList(),
+          ],
       ),
     );
   }
 
   Widget _buildStatsCard() {
+    final totalUsage = _stats['totalUsage'] as double;
+    final categories = _stats['categories'] as Map<String, dynamic>;
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(CozeSpacing.lg),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F0),
-        borderRadius: BorderRadius.circular(16),
+        color: CozeColors.cardGray,
+        borderRadius: CozeRadius.xxlBorder,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,50 +143,59 @@ class CreditsDetailPage extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Text('累计用量 ', style: TextStyle(fontSize: 14, color: CozeColors.fgDim)),
-                  Text(_totalUsage.toStringAsFixed(3),
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: CozeColors.fgPrimary)),
+                  const Text('累计用量 ',
+                      style: TextStyle(
+                          fontSize: CozeFontSize.s14, color: CozeColors.fgDim)),
+                  Text(_formatNumber(totalUsage),
+                      style: const TextStyle(
+                          fontSize: CozeFontSize.s24,
+                          fontWeight: FontWeight.bold,
+                          color: CozeColors.fgPrimary)),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.md, vertical: CozeSpacing.xs),
                 decoration: BoxDecoration(
                   border: Border.all(color: CozeColors.strokePrimary),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: CozeRadius.xlBorder,
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('近一个月', style: TextStyle(fontSize: 12, color: CozeColors.fgSecondary)),
-                    SizedBox(width: 4),
-                    Icon(Icons.expand_more, size: 16, color: CozeColors.fgDim),
+                    Text(_stats['period'] as String,
+                        style: const TextStyle(
+                            fontSize: CozeFontSize.s12, color: CozeColors.fgSecondary)),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.expand_more, size: 16, color: CozeColors.fgDim),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          ..._categories.entries.map((entry) {
-            final value = entry.value;
-            final isActive = value > 0;
+          const SizedBox(height: CozeSpacing.lg),
+          ...categories.entries.map((entry) {
+            final value = entry.value as double;
+            final ratio = value / totalUsage;
             return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: CozeSpacing.sm),
               child: Row(
                 children: [
-                  if (isActive)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5F5F5),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(entry.key, style: const TextStyle(fontSize: 14, color: CozeColors.fgPrimary)),
-                    )
-                  else
-                    Text(entry.key, style: const TextStyle(fontSize: 14, color: CozeColors.dimText)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.sm, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: value > 0 ? CozeColors.chipGray : Colors.transparent,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(entry.key,
+                        style: TextStyle(
+                            fontSize: CozeFontSize.s14,
+                            color: value > 0 ? CozeColors.fgPrimary : CozeColors.dimText)),
+                  ),
                   const Spacer(),
-                  Text(isActive ? value.toStringAsFixed(3) : '0',
-                      style: TextStyle(fontSize: 14, color: isActive ? CozeColors.fgPrimary : CozeColors.dimText)),
+                  Text(value > 0 ? _formatNumber(value) : '0',
+                      style: TextStyle(
+                          fontSize: CozeFontSize.s14,
+                          color: value > 0 ? CozeColors.fgPrimary : CozeColors.dimText)),
                 ],
               ),
             );
@@ -137,18 +206,26 @@ class CreditsDetailPage extends StatelessWidget {
   }
 
   Widget _buildSectionHeader() {
-    return const Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('全部消耗明细',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: CozeColors.fgPrimary)),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('全部', style: TextStyle(fontSize: 14, color: CozeColors.fgSecondary)),
-            SizedBox(width: 4),
-            Icon(Icons.expand_more, size: 16, color: CozeColors.fgDim),
-          ],
+        const Text('全部消耗明细',
+            style: TextStyle(
+                fontSize: CozeFontSize.s16,
+                fontWeight: FontWeight.bold,
+                color: CozeColors.fgPrimary)),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: CozeSpacing.sm),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('全部',
+                  style: TextStyle(
+                      fontSize: CozeFontSize.s14, color: CozeColors.fgSecondary)),
+              const SizedBox(width: 4),
+              const Icon(Icons.expand_more, size: 16, color: CozeColors.fgDim),
+            ],
+          ),
         ),
       ],
     );
@@ -157,21 +234,17 @@ class CreditsDetailPage extends StatelessWidget {
   Widget _buildRecordsList() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F0),
-        borderRadius: BorderRadius.circular(16),
+        color: CozeColors.cardGray,
+        borderRadius: CozeRadius.xxlBorder,
       ),
       child: Column(
         children: List.generate(_records.length, (index) {
-          final r = _records[index];
-          final amount = r['amount'] as double;
-          final abs = amount.abs();
-          final formatted = abs >= 10000
-              ? '${(abs / 10000).toStringAsFixed(4)}万'
-              : abs.toStringAsFixed(2);
+          final record = _records[index];
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: CozeSpacing.lg, vertical: CozeSpacing.md),
                 child: Row(
                   children: [
                     Expanded(
@@ -180,40 +253,60 @@ class CreditsDetailPage extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              Text(r['name'] as String,
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: CozeColors.fgPrimary)),
-                              const SizedBox(width: 8),
+                              Text(record['name'] as String,
+                                  style: const TextStyle(
+                                      fontSize: CozeFontSize.s16,
+                                      fontWeight: FontWeight.w600,
+                                      color: CozeColors.fgPrimary)),
+                              const SizedBox(width: CozeSpacing.sm),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF5F5F5),
+                                  color: CozeColors.chipGray,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: Text(r['type'] as String,
-                                    style: const TextStyle(fontSize: 12, color: CozeColors.brand5)),
+                                child: Text(record['type'] as String,
+                                    style: TextStyle(
+                                        fontSize: CozeFontSize.s12,
+                                        color: record['typeColor'] as Color)),
                               ),
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Text('${r['time']} | 查看项目',
-                              style: const TextStyle(fontSize: 12, color: CozeColors.dimText)),
+                          Text('${record['time']} | 查看项目',
+                              style: const TextStyle(
+                                  fontSize: CozeFontSize.s12,
+                                  color: CozeColors.dimText)),
                         ],
                       ),
                     ),
-                    Text('-$formatted',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: CozeColors.error)),
+                    Text(_formatAmount(record['amount'] as double),
+                        style: TextStyle(
+                            fontSize: CozeFontSize.s18,
+                            fontWeight: FontWeight.bold,
+                            color: record['amount'] < 0 ? CozeColors.error : CozeColors.success)),
                   ],
                 ),
               ),
               if (index < _records.length - 1)
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Divider(height: 1, color: CozeColors.strokePrimary),
-                ),
+                Divider(height: 1, color: CozeColors.strokePrimary, indent: CozeSpacing.lg),
             ],
           );
         }),
       ),
     );
+  }
+
+  String _formatNumber(double value) {
+    return value.toStringAsFixed(3);
+  }
+
+  String _formatAmount(double value) {
+    final abs = value.abs();
+    final formatted = abs >= 10000
+        ? '${(abs / 10000).toStringAsFixed(4)}万'
+        : abs.toStringAsFixed(2);
+    return '-$formatted';
   }
 }

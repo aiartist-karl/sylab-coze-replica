@@ -4,8 +4,6 @@ import '../theme/coze_theme.dart';
 import '../models/project_item.dart';
 import '../widgets/coze_dialog.dart';
 import 'project_detail_page.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 
 class ChatPage extends StatefulWidget {
   final String agentName;
@@ -226,77 +224,9 @@ class _ChatPageState extends State<ChatPage> {
             color: CozeColors.mgPrimary,
             borderRadius: CozeRadius.xlBorder,
           ),
-          child: msg.filePath != null
-              ? _buildFileAttachment(msg)
-              : Text(msg.content,
-                  style: const TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgPrimary)),
+          child: Text(msg.content,
+              style: const TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgPrimary)),
         ),
-      ),
-    );
-  }
-
-  Widget _buildFileAttachment(_Message msg) {
-    if (msg.fileType == 'image' && msg.filePath != null) {
-      return ClipRRect(
-        borderRadius: CozeRadius.xlBorder,
-        child: Image.file(
-          File(msg.filePath!),
-          width: 200,
-          height: 200,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildFilePlaceholder(msg);
-          },
-        ),
-      );
-    } else if (msg.fileType == 'video') {
-      return _buildVideoAttachment(msg);
-    } else {
-      return _buildFilePlaceholder(msg);
-    }
-  }
-
-  Widget _buildVideoAttachment(_Message msg) {
-    return Container(
-      width: 200,
-      height: 150,
-      decoration: BoxDecoration(
-        color: CozeColors.chipGray,
-        borderRadius: CozeRadius.xlBorder,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.videocam, size: 40, color: CozeColors.fgSecondary),
-          const SizedBox(height: CozeSpacing.sm),
-          Text(
-            msg.fileName ?? '视频',
-            style: const TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.fgDim),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilePlaceholder(_Message msg) {
-    return Container(
-      padding: const EdgeInsets.all(CozeSpacing.md),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.insert_drive_file, size: 32, color: CozeColors.fgSecondary),
-          const SizedBox(width: CozeSpacing.sm),
-          Flexible(
-            child: Text(
-              msg.fileName ?? '文件',
-              style: const TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgPrimary),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -366,7 +296,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  // ─── Attachment Menu (Image, Video, File) ──
+  // ─── Attachment Menu (only Image) ──
   Widget _buildAttachmentMenu() {
     return Container(
       margin: const EdgeInsets.fromLTRB(CozeSpacing.lg, 0, CozeSpacing.lg, CozeSpacing.sm),
@@ -379,110 +309,34 @@ class _ChatPageState extends State<ChatPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          _attachOption(Icons.image_outlined, '图片', () => _pickImage()),
-          const SizedBox(width: CozeSpacing.md),
-          _attachOption(Icons.videocam_outlined, '视频', () => _pickVideo()),
-          const SizedBox(width: CozeSpacing.md),
-          _attachOption(Icons.insert_drive_file_outlined, '文件', () => _pickFile()),
-        ],
-      ),
-    );
-  }
-
-  Widget _attachOption(IconData icon, String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: CozeColors.chipGray,
-              borderRadius: CozeRadius.xlBorder,
+          GestureDetector(
+            onTap: () {
+              setState(() => _showAttachmentMenu = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('图片选择功能开发中'), duration: Duration(seconds: 1)),
+              );
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: CozeColors.chipGray,
+                    borderRadius: CozeRadius.xlBorder,
+                  ),
+                  child: Icon(Icons.image_outlined, size: 24, color: CozeColors.fgSecondary),
+                ),
+                const SizedBox(height: 4),
+                const Text('图片',
+                    style: TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.fgDim)),
+              ],
             ),
-            child: Icon(icon, size: 24, color: CozeColors.fgSecondary),
           ),
-          const SizedBox(height: 4),
-          Text(label,
-              style: const TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.fgDim)),
         ],
       ),
     );
-  }
-
-  Future<void> _pickImage() async {
-    setState(() => _showAttachmentMenu = false);
-    try {
-      final picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        setState(() {
-          _messages.add(_Message(
-            isUser: true,
-            content: '',
-            filePath: image.path,
-            fileName: image.name,
-            fileType: 'image',
-          ));
-        });
-        _scrollToBottom();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('选择图片失败: $e'), duration: const Duration(seconds: 2)),
-        );
-      }
-    }
-  }
-
-  Future<void> _pickVideo() async {
-    setState(() => _showAttachmentMenu = false);
-    try {
-      final picker = ImagePicker();
-      final XFile? video = await picker.pickVideo(source: ImageSource.gallery);
-      if (video != null) {
-        setState(() {
-          _messages.add(_Message(
-            isUser: true,
-            content: '',
-            filePath: video.path,
-            fileName: video.name,
-            fileType: 'video',
-          ));
-        });
-        _scrollToBottom();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('选择视频失败: $e'), duration: const Duration(seconds: 2)),
-        );
-      }
-    }
-  }
-
-  Future<void> _pickFile() async {
-    setState(() => _showAttachmentMenu = false);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('文件上传功能开发中'), duration: Duration(seconds: 2)),
-      );
-    }
-  }
-
-  void _scrollToBottom() {
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
   }
 
   // ── Bottom Input Area ───
@@ -500,7 +354,22 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             GestureDetector(
               onTap: () => setState(() => _showAttachmentMenu = !_showAttachmentMenu),
-              child: Icon(Icons.add_circle_outline, size: 28, color: CozeColors.fgDim),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(Icons.add_circle_outline, size: 28, color: CozeColors.fgDim),
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                          color: CozeColors.error, shape: BoxShape.circle),
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(width: CozeSpacing.sm),
             Expanded(
@@ -632,9 +501,6 @@ class _Message {
   final String content;
   final bool hasMention;
   final String? mentionText;
-  final String? filePath;
-  final String? fileName;
-  final String? fileType; // 'image', 'video', 'file'
 
   const _Message({
     required this.isUser,
@@ -644,9 +510,6 @@ class _Message {
     required this.content,
     this.hasMention = false,
     this.mentionText,
-    this.filePath,
-    this.fileName,
-    this.fileType,
   });
 }
 
