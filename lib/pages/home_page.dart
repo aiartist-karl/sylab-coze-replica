@@ -8,6 +8,7 @@ import 'search_page.dart';
 import 'project_page.dart';
 import 'project_detail_page.dart';
 import 'profile_page.dart';
+import 'memory_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -206,6 +207,9 @@ class _HomePageState extends State<HomePage> {
       }),
       _ActionData(Icons.person_outline, '我的', () {
         Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage()));
+      }),
+      _ActionData(Icons.memory, '记忆', () {
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const MemoryPage()));
       }),
       _ActionData(Icons.auto_awesome, '技能', () {
         Navigator.push(context, MaterialPageRoute(builder: (_) => const SkillStorePage()));
@@ -439,12 +443,16 @@ class _HomePageState extends State<HomePage> {
     }
 
     final menuItems = [
-      _MenuItem(Icons.chat_bubble_outline, '新建项目', Icons.add,
-          () => dismissAndToast('功能开发中，敬请期待')),
-      _MenuItem(Icons.code, '新建编程项目', null,
-          () => dismissAndToast('功能开发中，敬请期待')),
-      _MenuItem(Icons.movie_outlined, '新建视频项目', null,
-          () => dismissAndToast('功能开发中，敬请期待')),
+      _MenuItem(Icons.chat_bubble_outline, '新建会话', Icons.add,
+          () {
+            _dismissMenu();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ChatPage(agentName: '新会话'),
+              ),
+            );
+          }),
       _MenuItem(Icons.smart_toy_outlined, '新建Agent', null,
           () => dismissAndToast('功能开发中，敬请期待')),
     ];
