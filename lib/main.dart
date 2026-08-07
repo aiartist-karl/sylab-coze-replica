@@ -27,7 +27,10 @@ class CozeReplicaApp extends StatelessWidget {
           surfaceTintColor: Colors.transparent,
         ),
       ),
-      home: const HomePage(),
+      home: ListenableBuilder(
+        listenable: UserService(),
+        builder: (context, _) => const HomePage(),
+      ),
     );
   }
 }

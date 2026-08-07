@@ -41,6 +41,7 @@ class _HomePageState extends State<HomePage> {
           children: [
             _buildUserBar(),
             _buildCreditsBanner(),
+            _buildQuickActions(),
             Expanded(child: _buildChatList()),
           ],
         ),
