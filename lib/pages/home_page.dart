@@ -5,12 +5,9 @@ import '../theme/coze_theme.dart';
 import '../models/chat_item.dart';
 import '../services/user_service.dart';
 import 'skill_store_page.dart';
-import 'device_page.dart';
 import 'chat_page.dart';
 import 'search_page.dart';
 import 'project_page.dart';
-import 'world_page.dart';
-import 'history_page.dart';
 import 'memory_page.dart';
 import 'credits_detail_page.dart';
 import '../widgets/coze_dialog.dart';
@@ -169,87 +166,6 @@ class _HomePageState extends State<HomePage> {
             const Icon(Icons.chevron_right, size: 18, color: CozeColors.fgDim),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showCreditsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('积分详情',
-            style: TextStyle(fontSize: CozeFontSize.s18, fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: CozeSpacing.sm),
-            _creditRow('当前积分', '1,500'),
-            _creditRow('每日赠送', '100'),
-            _creditRow('本月已使用', '2,300'),
-            const SizedBox(height: CozeSpacing.md),
-            Container(
-              padding: const EdgeInsets.all(CozeSpacing.md),
-              decoration: BoxDecoration(
-                color: CozeColors.lightOrange,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.star, size: 20, color: CozeColors.warning),
-                  SizedBox(width: CozeSpacing.sm),
-                  Expanded(
-                    child: Text('升级Pro享受无限积分',
-                        style: TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgPrimary)),
-                  ),
-                  Text('¥99/月',
-                      style: TextStyle(
-                          fontSize: CozeFontSize.s14,
-                          fontWeight: FontWeight.bold,
-                          color: CozeColors.brand5)),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('知道了', style: TextStyle(color: CozeColors.fgDim)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('功能开发中'), duration: Duration(seconds: 1)),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: CozeColors.brand5,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text('升级'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _creditRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.fgDim)),
-          Text(value,
-              style: const TextStyle(
-                  fontSize: CozeFontSize.s14,
-                  fontWeight: FontWeight.w600,
-                  color: CozeColors.fgPrimary)),
-        ],
       ),
     );
   }

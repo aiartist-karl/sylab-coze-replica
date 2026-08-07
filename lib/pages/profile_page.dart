@@ -5,9 +5,7 @@ import '../theme/coze_theme.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
 import '../widgets/coze_dialog.dart';
-import 'device_page.dart';
-import 'skill_store_page.dart';
-import 'history_page.dart';
+
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -87,50 +85,8 @@ class _ProfilePageState extends State<ProfilePage> {
           // ─── User Profile Card ───
           _buildProfileCard(context),
           const SizedBox(height: CozeSpacing.xl),
-          // ─── Credits/Membership Card ───
+          // ─── Credits Card ───
           _buildMembershipCard(context),
-          const SizedBox(height: CozeSpacing.xxl),
-          // ─── Feature Entries ───
-          _buildFeatureSection(context, '常用功能', [
-            _FeatureItem(Icons.devices, '设备管理', CozeColors.infoBlue, () {
-              Navigator.push(context, cozeFadeRoute((_) => const DevicePage()));
-            }),
-            _FeatureItem(Icons.auto_awesome, '技能商店', CozeColors.brand5, () {
-              Navigator.push(context, cozeFadeRoute((_) => const SkillStorePage()));
-            }),
-            _FeatureItem(Icons.history, '历史对话', CozeColors.teal, () {
-              Navigator.push(context, cozeFadeRoute((_) => const HistoryPage()));
-            }),
-            _FeatureItem(Icons.favorite_outline, '我的收藏', CozeColors.error, () {
-              _showToast(context, '功能开发中');
-            }),
-          ]),
-          const SizedBox(height: CozeSpacing.lg),
-          // ─── More Features ───
-          _buildFeatureSection(context, '更多服务', [
-            _FeatureItem(Icons.workspace_premium_outlined, '会员特权', CozeColors.warning, () {
-              _showToast(context, '功能开发中');
-            }),
-            _FeatureItem(Icons.card_giftcard_outlined, '积分商城', const Color(0xFFFF6B6B), () {
-              _showToast(context, '功能开发中');
-            }),
-            _FeatureItem(Icons.people_outline, '邀请好友', CozeColors.success, () {
-              _showToast(context, '功能开发中');
-            }),
-          ]),
-          const SizedBox(height: CozeSpacing.lg),
-          // ─── About & Help ───
-          _buildFeatureSection(context, '关于与帮助', [
-            _FeatureItem(Icons.info_outline, '关于Coze', CozeColors.fgDim, () {
-              _showToast(context, 'Coze Replica v1.0.0');
-            }),
-            _FeatureItem(Icons.help_outline, '帮助与反馈', CozeColors.fgDim, () {
-              _showToast(context, '功能开发中');
-            }),
-            _FeatureItem(Icons.policy_outlined, '隐私政策', CozeColors.fgDim, () {
-              _showToast(context, '功能开发中');
-            }),
-          ]),
           const SizedBox(height: CozeSpacing.xxl),
           // ─── Logout Button ───
           if (auth.isLoggedIn)
@@ -140,7 +96,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 onPressed: () async {
                   await auth.logout();
                   if (context.mounted) {
-                    _showToast(context, '已退出登录');
                     Navigator.of(context).pop();
                   }
                 },
