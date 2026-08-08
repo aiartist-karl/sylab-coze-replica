@@ -74,7 +74,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
           // Upload button
           IconButton(
             icon: const Icon(Icons.cloud_upload_outlined, size: 22, color: CozeColors.brand5),
-            onPressed: () => _showUploadDialog(),
+            onPressed: () => _showUploadDialog(context),
           ),
         ],
       ),
@@ -160,7 +160,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
               style: TextStyle(fontSize: CozeFontSize.s16, color: CozeColors.fgDim)),
           const SizedBox(height: CozeSpacing.sm),
           GestureDetector(
-            onTap: () => _showUploadDialog(),
+            onTap: () => _showUploadDialog(context),
             child: const Text('上传文件',
                 style: TextStyle(fontSize: CozeFontSize.s14, color: CozeColors.brand5)),
           ),
@@ -255,7 +255,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
   Widget _buildFileTile(ProjectFile file) {
     final color = fileTypeColor(file.type);
     return GestureDetector(
-      onTap: () => _showFilePreview(file),
+      onTap: () => _showFilePreview(context, file),
       child: Container(
         padding: const EdgeInsets.all(CozeSpacing.md),
         decoration: BoxDecoration(
@@ -302,7 +302,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             ),
             // More options
             GestureDetector(
-              onTap: () => _showFileOptions(file),
+              onTap: () => _showFileOptions(context, file),
               child: const Icon(Icons.more_horiz, size: 20, color: CozeColors.dimText),
             ),
           ],
@@ -326,7 +326,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
         final file = _filteredFiles[index];
         final color = fileTypeColor(file.type);
         return GestureDetector(
-          onTap: () => _showFilePreview(file),
+          onTap: () => _showFilePreview(context, file),
           child: Container(
             padding: const EdgeInsets.all(CozeSpacing.sm),
             decoration: BoxDecoration(
@@ -365,110 +365,142 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
   }
 
   // ─── File Preview Dialog ───
-  void _showFilePreview(ProjectFile file) {
+  void _showFilePreview(BuildContext context, ProjectFile file) {
     final color = fileTypeColor(file.type);
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        margin: const EdgeInsets.all(CozeSpacing.lg),
-        padding: const EdgeInsets.all(CozeSpacing.xl),
-        decoration: BoxDecoration(
-          color: CozeColors.bgMax,
-          borderRadius: CozeRadius.xxlBorder,
-          boxShadow: CozeShadow.defaultShadow,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: CozeRadius.xlBorder,
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierDismissible: true,
+        barrierColor: Colors.black54,
+        transitionDuration: const Duration(milliseconds: 250),
+        reverseTransitionDuration: const Duration(milliseconds: 200),
+        pageBuilder: (ctx, anim, _) => FadeTransition(
+          opacity: anim,
+          child: GestureDetector(
+            onTap: () => Navigator.pop(ctx),
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: GestureDetector(
+                onTap: () {}, // prevent tap below from closing
+                child: Center(
+                  child: Container(
+                    margin: const EdgeInsets.all(CozeSpacing.lg),
+                    padding: const EdgeInsets.all(CozeSpacing.xl),
+                    decoration: BoxDecoration(
+                      color: CozeColors.bgMax,
+                      borderRadius: CozeRadius.xxlBorder,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: color.withOpacity(0.1),
+                                borderRadius: CozeRadius.xlBorder,
+                              ),
+                              child: Icon(fileTypeIcon(file.type), size: 24, color: color),
+                            ),
+                            const SizedBox(width: CozeSpacing.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(file.name,
+                                      style: const TextStyle(
+                                          fontSize: CozeFontSize.s16,
+                                          fontWeight: FontWeight.bold,
+                                          color: CozeColors.fgPrimary)),
+                                  const SizedBox(height: 4),
+                                  Text('${fileTypeName(file.type)} · ${file.size}',
+                                      style: const TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.dimText)),
+                                ],
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => Navigator.pop(ctx),
+                              child: const Icon(Icons.close, size: 20, color: CozeColors.dimText),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: CozeSpacing.lg),
+                        // File info rows
+                        _fileInfoRow(Icons.schedule, '修改时间', file.modifiedTime),
+                        _fileInfoRow(Icons.storage_outlined, '文件大小', file.size),
+                        _fileInfoRow(Icons.category_outlined, '文件类型', fileTypeName(file.type)),
+                        if (file.preview != null) ...[
+                          const SizedBox(height: CozeSpacing.md),
+                          const Divider(),
+                          const SizedBox(height: CozeSpacing.sm),
+                          const Text('预览',
+                              style: TextStyle(
+                                  fontSize: CozeFontSize.s14,
+                                  fontWeight: FontWeight.w600,
+                                  color: CozeColors.fgPrimary)),
+                          const SizedBox(height: CozeSpacing.sm),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(CozeSpacing.md),
+                            decoration: BoxDecoration(
+                              color: CozeColors.chipGray,
+                              borderRadius: CozeRadius.xlBorder,
+                            ),
+                            child: Text(file.preview!,
+                                style: const TextStyle(
+                                    fontSize: CozeFontSize.s14, color: CozeColors.fgDim, height: 1.4)),
+                          ),
+                        ],
+                        const SizedBox(height: CozeSpacing.lg),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () {
+                                  Navigator.pop(ctx);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('下载中...'), duration: Duration(seconds: 1)),
+                                  );
+                                },
+                                icon: const Icon(Icons.download_outlined, size: 18),
+                                label: const Text('下载'),
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(borderRadius: CozeRadius.xlBorder),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: CozeSpacing.md),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  Navigator.pop(ctx);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('分享功能开发中'), duration: Duration(seconds: 1)),
+                                  );
+                                },
+                                icon: const Icon(Icons.share_outlined, size: 18),
+                                label: const Text('分享'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: CozeColors.brand5,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: CozeRadius.xlBorder),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Icon(fileTypeIcon(file.type), size: 24, color: color),
                 ),
-                const SizedBox(width: CozeSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(file.name,
-                          style: const TextStyle(
-                              fontSize: CozeFontSize.s16,
-                              fontWeight: FontWeight.bold,
-                              color: CozeColors.fgPrimary)),
-                      const SizedBox(height: 4),
-                      Text('${fileTypeName(file.type)} · ${file.size}',
-                          style: const TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.dimText)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: CozeSpacing.lg),
-            // File info rows
-            _fileInfoRow(Icons.schedule, '修改时间', file.modifiedTime),
-            _fileInfoRow(Icons.storage_outlined, '文件大小', file.size),
-            _fileInfoRow(Icons.category_outlined, '文件类型', fileTypeName(file.type)),
-            if (file.preview != null) ...[
-              const SizedBox(height: CozeSpacing.md),
-              const Divider(),
-              const SizedBox(height: CozeSpacing.sm),
-              const Text('预览',
-                  style: TextStyle(
-                      fontSize: CozeFontSize.s14,
-                      fontWeight: FontWeight.w600,
-                      color: CozeColors.fgPrimary)),
-              const SizedBox(height: CozeSpacing.sm),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(CozeSpacing.md),
-                decoration: BoxDecoration(
-                  color: CozeColors.chipGray,
-                  borderRadius: CozeRadius.xlBorder,
-                ),
-                child: Text(file.preview!,
-                    style: const TextStyle(
-                        fontSize: CozeFontSize.s14, color: CozeColors.fgDim, height: 1.4)),
               ),
-            ],
-            const SizedBox(height: CozeSpacing.lg),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.download_outlined, size: 18),
-                    label: const Text('下载'),
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: CozeRadius.xlBorder),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: CozeSpacing.md),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.share_outlined, size: 18),
-                    label: const Text('分享'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: CozeColors.brand5,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: CozeRadius.xlBorder),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -494,127 +526,163 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
   }
 
   // ─── File Options ───
-  void _showFileOptions(ProjectFile file) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        margin: const EdgeInsets.all(CozeSpacing.lg),
-        padding: const EdgeInsets.symmetric(vertical: CozeSpacing.md),
-        decoration: BoxDecoration(
-          color: CozeColors.bgMax,
-          borderRadius: CozeRadius.xxlBorder,
-          boxShadow: CozeShadow.defaultShadow,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.download_outlined, color: CozeColors.fgSecondary),
-              title: const Text('下载文件'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('下载中...'), duration: Duration(seconds: 1)),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.share_outlined, color: CozeColors.fgSecondary),
-              title: const Text('分享文件'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('分享功能开发中'), duration: Duration(seconds: 1)),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.edit_outlined, color: CozeColors.fgSecondary),
-              title: const Text('重命名'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('重命名功能开发中'), duration: Duration(seconds: 1)),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete_outline, color: CozeColors.error),
-              title: const Text('删除', style: TextStyle(color: CozeColors.error)),
-              onTap: () {
-                setState(() {
-                  _allFiles.removeWhere((f) => f.name == file.name);
-                });
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('已删除 ${file.name}'),
-                    duration: const Duration(seconds: 2),
-                    action: SnackBarAction(
-                      label: '撤销',
-                      textColor: CozeColors.brand5,
-                      onPressed: () {
-                        setState(() => _allFiles.add(file));
-                      },
+  void _showFileOptions(BuildContext context, ProjectFile file) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierDismissible: true,
+        barrierColor: Colors.black54,
+        transitionDuration: const Duration(milliseconds: 250),
+        reverseTransitionDuration: const Duration(milliseconds: 200),
+        pageBuilder: (ctx, anim, _) => FadeTransition(
+          opacity: anim,
+          child: GestureDetector(
+            onTap: () => Navigator.pop(ctx),
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: GestureDetector(
+                onTap: () {},
+                child: Center(
+                  child: Container(
+                    margin: const EdgeInsets.all(CozeSpacing.lg),
+                    padding: const EdgeInsets.symmetric(vertical: CozeSpacing.md),
+                    decoration: BoxDecoration(
+                      color: CozeColors.bgMax,
+                      borderRadius: CozeRadius.xxlBorder,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.download_outlined, color: CozeColors.fgSecondary),
+                          title: const Text('下载文件'),
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('下载中...'), duration: Duration(seconds: 1)),
+                            );
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.share_outlined, color: CozeColors.fgSecondary),
+                          title: const Text('分享文件'),
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('分享功能开发中'), duration: Duration(seconds: 1)),
+                            );
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.edit_outlined, color: CozeColors.fgSecondary),
+                          title: const Text('重命名'),
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('重命名功能开发中'), duration: Duration(seconds: 1)),
+                            );
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.delete_outline, color: CozeColors.error),
+                          title: const Text('删除', style: TextStyle(color: CozeColors.error)),
+                          onTap: () {
+                            setState(() {
+                              _allFiles.removeWhere((f) => f.name == file.name);
+                            });
+                            Navigator.pop(ctx);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('已删除 ${file.name}'),
+                                duration: const Duration(seconds: 2),
+                                action: SnackBarAction(
+                                  label: '撤销',
+                                  textColor: CozeColors.brand5,
+                                  onPressed: () {
+                                    setState(() => _allFiles.add(file));
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                );
-              },
+                ),
+              ),
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
   // ─── Upload Dialog ───
-  void _showUploadDialog() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        margin: const EdgeInsets.all(CozeSpacing.lg),
-        padding: const EdgeInsets.symmetric(vertical: CozeSpacing.md),
-        decoration: BoxDecoration(
-          color: CozeColors.bgMax,
-          borderRadius: CozeRadius.xxlBorder,
-          boxShadow: CozeShadow.defaultShadow,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: CozeSpacing.md),
-              child: Text('上传文件',
-                  style: TextStyle(
-                      fontSize: CozeFontSize.s16,
-                      fontWeight: FontWeight.bold,
-                      color: CozeColors.fgPrimary)),
+  void _showUploadDialog(BuildContext context) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierDismissible: true,
+        barrierColor: Colors.black54,
+        transitionDuration: const Duration(milliseconds: 250),
+        reverseTransitionDuration: const Duration(milliseconds: 200),
+        pageBuilder: (ctx, anim, _) => FadeTransition(
+          opacity: anim,
+          child: GestureDetector(
+            onTap: () => Navigator.pop(ctx),
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              body: GestureDetector(
+                onTap: () {},
+                child: Center(
+                  child: Container(
+                    margin: const EdgeInsets.all(CozeSpacing.lg),
+                    padding: const EdgeInsets.symmetric(vertical: CozeSpacing.md),
+                    decoration: BoxDecoration(
+                      color: CozeColors.bgMax,
+                      borderRadius: CozeRadius.xxlBorder,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: CozeSpacing.md),
+                          child: Text('上传文件',
+                              style: TextStyle(
+                                  fontSize: CozeFontSize.s16,
+                                  fontWeight: FontWeight.bold,
+                                  color: CozeColors.fgPrimary)),
+                        ),
+                        Divider(height: 1, color: CozeColors.strokePrimary),
+                        _uploadOption(ctx, Icons.image_outlined, '图片', '从相册选择或拍照上传', () {
+                          _simulateUpload('示例图片.png', FileType.image, '1.2 MB');
+                        }),
+                        _uploadOption(ctx, Icons.insert_drive_file_outlined, '文档', 'PDF、Word、TXT 等文档', () {
+                          _simulateUpload('示例文档.pdf', FileType.document, '856 KB');
+                        }),
+                        _uploadOption(ctx, Icons.code, '代码文件', '源代码或配置文件', () {
+                          _simulateUpload('example.dart', FileType.code, '4.2 KB');
+                        }),
+                        _uploadOption(ctx, Icons.movie_outlined, '视频', 'MP4、MOV 等视频文件', () {
+                          _simulateUpload('示例视频.mp4', FileType.video, '32 MB');
+                        }),
+                        _uploadOption(ctx, Icons.storage_outlined, '数据集', 'CSV、JSON、Excel 等数据文件', () {
+                          _simulateUpload('data.csv', FileType.data, '2.8 MB');
+                        }),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
-            Divider(height: 1, color: CozeColors.strokePrimary),
-            _uploadOption(Icons.image_outlined, '图片', '从相册选择或拍照上传', () {
-              _simulateUpload('示例图片.png', FileType.image, '1.2 MB');
-            }),
-            _uploadOption(Icons.insert_drive_file_outlined, '文档', 'PDF、Word、TXT 等文档', () {
-              _simulateUpload('示例文档.pdf', FileType.document, '856 KB');
-            }),
-            _uploadOption(Icons.code, '代码文件', '源代码或配置文件', () {
-              _simulateUpload('example.dart', FileType.code, '4.2 KB');
-            }),
-            _uploadOption(Icons.movie_outlined, '视频', 'MP4、MOV 等视频文件', () {
-              _simulateUpload('示例视频.mp4', FileType.video, '32 MB');
-            }),
-            _uploadOption(Icons.storage_outlined, '数据集', 'CSV、JSON、Excel 等数据文件', () {
-              _simulateUpload('data.csv', FileType.data, '2.8 MB');
-            }),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _uploadOption(IconData icon, String title, String desc, VoidCallback onTap) {
+  Widget _uploadOption(BuildContext ctx, IconData icon, String title, String desc, VoidCallback onTap) {
     return ListTile(
       leading: Container(
         width: 40,
@@ -629,7 +697,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
       subtitle: Text(desc, style: const TextStyle(fontSize: CozeFontSize.s12, color: CozeColors.fgDim)),
       trailing: const Icon(Icons.chevron_right, size: 20, color: CozeColors.dimText),
       onTap: () {
-        Navigator.pop(context);
+        Navigator.pop(ctx);
         onTap();
       },
     );

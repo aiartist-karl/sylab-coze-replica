@@ -278,83 +278,84 @@ class _ProjectPageState extends State<ProjectPage> {
   // ─── Create Dialog ───
   void _showCreateDialog() {
     final controller = TextEditingController();
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        margin: const EdgeInsets.all(CozeSpacing.lg),
-        padding: const EdgeInsets.all(CozeSpacing.xl),
-        decoration: BoxDecoration(
-          color: CozeColors.bgMax,
-          borderRadius: CozeRadius.xxlBorder,
-          boxShadow: CozeShadow.defaultShadow,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('创建新项目',
-                style: TextStyle(
-                    fontSize: CozeFontSize.s18,
-                    fontWeight: FontWeight.bold,
-                    color: CozeColors.fgPrimary)),
-            const SizedBox(height: CozeSpacing.lg),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: '输入项目名称',
-                hintStyle: const TextStyle(color: CozeColors.dimText),
-                filled: true,
-                fillColor: CozeColors.chipGray,
-                border: OutlineInputBorder(
-                  borderRadius: CozeRadius.xlBorder,
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg, vertical: CozeSpacing.md),
-              ),
-            ),
-            const SizedBox(height: CozeSpacing.lg),
-            GestureDetector(
-              onTap: () {
-                final name = controller.text.trim();
-                if (name.isNotEmpty) {
-                  setState(() {
-                    _projects.insert(0, ProjectItem(
-                      id: 'p${DateTime.now().millisecondsSinceEpoch}',
-                      name: name,
-                      description: '新项目 — 开始你的第一个对话吧',
-                      avatar: '📁',
-                      lastMessage: '刚刚创建',
-                      lastActiveTime: '刚刚',
-                    ));
-                  });
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('已创建项目「$name」'),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                }
-              },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
-                  color: CozeColors.brand5,
-                  borderRadius: CozeRadius.xlBorder,
-                ),
-                child: const Center(
-                  child: Text('创建',
-                      style: TextStyle(
-                          fontSize: CozeFontSize.s16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white)),
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: CozeSpacing.xl),
+        child: Container(
+          padding: const EdgeInsets.all(CozeSpacing.xl),
+          decoration: BoxDecoration(
+            color: CozeColors.bgMax,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('创建新项目',
+                  style: TextStyle(
+                      fontSize: CozeFontSize.s18,
+                      fontWeight: FontWeight.bold,
+                      color: CozeColors.fgPrimary)),
+              const SizedBox(height: CozeSpacing.lg),
+              TextField(
+                controller: controller,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: '输入项目名称',
+                  hintStyle: const TextStyle(color: CozeColors.dimText),
+                  filled: true,
+                  fillColor: CozeColors.chipGray,
+                  border: OutlineInputBorder(
+                    borderRadius: CozeRadius.xlBorder,
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: CozeSpacing.lg, vertical: CozeSpacing.md),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: CozeSpacing.lg),
+              GestureDetector(
+                onTap: () {
+                  final name = controller.text.trim();
+                  if (name.isNotEmpty) {
+                    setState(() {
+                      _projects.insert(0, ProjectItem(
+                        id: 'p${DateTime.now().millisecondsSinceEpoch}',
+                        name: name,
+                        description: '新项目 — 开始你的第一个对话吧',
+                        avatar: '📁',
+                        lastMessage: '刚刚创建',
+                        lastActiveTime: '刚刚',
+                      ));
+                    });
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('已创建项目「$name」'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: CozeColors.brand5,
+                    borderRadius: CozeRadius.xlBorder,
+                  ),
+                  child: const Center(
+                    child: Text('创建',
+                        style: TextStyle(
+                            fontSize: CozeFontSize.s16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white)),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
